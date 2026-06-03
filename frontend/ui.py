@@ -31,9 +31,14 @@ def setup_page():
             --primary-color: #FB493D !important;
         }
         
-        /* Force typography globally */
-        html, body, [class*="css"], .main, .stApp, .stApp * {
+        /* Force typography globally on standard text containers, avoiding icon font overrides */
+        html, body, .main, .stApp, p, h1, h2, h3, h4, h5, h6, label, li, small, input, button, textarea {
             font-family: 'Plus Jakarta Sans', sans-serif !important;
+        }
+        
+        /* Restore font family for Streamlit's Material Icons/Symbols to prevent text rendering */
+        [data-testid="stIconMaterial"] {
+            font-family: 'Material Symbols Rounded', 'Material Symbols Outlined', 'Material Icons' !important;
         }
         
         /* Force background color on all main app viewports */
@@ -122,6 +127,26 @@ def setup_page():
             border-color: #FB493D !important; /* Coral Red focus border */
             background-color: #fff9f8 !important; /* Soft warm pink-white background */
             box-shadow: 0 10px 15px -3px rgba(251, 73, 61, 0.1) !important;
+        }
+        
+        /* Style the file uploader button to match our palette and look premium */
+        div[data-testid="stFileUploader"] button {
+            background-color: #282B3A !important;
+            color: #ffffff !important;
+            border: 1px solid #282B3A !important;
+            border-radius: 8px !important;
+            padding: 8px 16px !important;
+            font-weight: 600 !important;
+            font-size: 0.9rem !important;
+            transition: all 0.2s ease-in-out !important;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1) !important;
+        }
+        div[data-testid="stFileUploader"] button:hover {
+            background-color: #FB493D !important;
+            border-color: #FB493D !important;
+            color: #ffffff !important;
+            transform: scale(1.02) !important;
+            box-shadow: 0 4px 8px rgba(251, 73, 61, 0.2) !important;
         }
         
         /* Styling Streamlit inputs: Text Input Field */
