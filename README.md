@@ -6,7 +6,7 @@ A complete, intermediate-level **Retrieval-Augmented Generation (RAG)** applicat
 
 ## 🚀 Tech Stack
 * **Frontend**: [Streamlit](https://streamlit.io/) (Clean, responsive web interface)
-* **LLM**: [Google Gemini 1.5 Flash](https://deepmind.google/technologies/gemini/) (Fast, high-context generative model)
+* **LLM**: [Google Gemini 2.5 Flash](https://deepmind.google/technologies/gemini/) (Fast, high-context generative model)
 * **Orchestration**: [LangChain](https://www.langchain.com/) (Modular RAG orchestration and prompt pipelines)
 * **Vector Database**: [ChromaDB](https://www.trychroma.com/) (Local, fast, in-process persistent vector database)
 * **Embeddings**: [SentenceTransformers (all-MiniLM-L6-v2)](https://huggingface.co/sentence-transformers/all-MiniLM-L6-v2) (Local, 384-dimensional semantic encoder)
@@ -41,7 +41,7 @@ Below is the step-by-step data flow showing how clinical information is processe
 [rag_chain.py]  ───► Context formatting & Gemini Prompt Injection
      │
      ▼
-[Gemini 1.5 LLM]───► Grounded Response Generation
+[Gemini 2.5 LLM]───► Grounded Response Generation
      │
      ▼
 [Streamlit UI]  ───► Answer Display & Citation Card References (Source Name & Page)
