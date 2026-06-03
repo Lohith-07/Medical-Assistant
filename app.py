@@ -19,8 +19,6 @@ if "uploaded_filename" not in st.session_state:
     st.session_state.uploaded_filename = None
 if "retriever" not in st.session_state:
     st.session_state.retriever = None
-if "llm" not in st.session_state:
-    st.session_state.llm = None
 
 # 4. Check for Gemini API key and initialize LLM early
 api_key = os.getenv("GEMINI_API_KEY") or os.getenv("GOOGLE_API_KEY")
@@ -33,16 +31,15 @@ if not api_key or api_key == "your_gemini_api_key_here":
     st.info("You can get a free Gemini API key from Google AI Studio.")
     st.stop()  # Stop execution of the app here until the API key is configured
 
-# Initialize LLM in session state if not done already
-if st.session_state.llm is None:
-    try:
-        st.session_state.llm = get_llm()
-    except Exception as e:
-        st.error(f"Failed to initialize Gemini LLM: {e}")
-        st.stop()
+# Initialize LLM instance on every rerun to prevent caching stale model objects
+try:
+    llm = get_llm()
+except Exception as e:
+    st.error(f"Failed to initialize Gemini LLM: {e}")
+    st.stop()
 
 # 5. Sidebar or main section for PDF upload
-st.write("### 1. Upload Document")
+st.markdown('<div class="section-title">📂 1. Upload Document</div>', unsafe_allow_html=True)
 uploaded_file = st.file_uploader(
     "Upload a medical PDF (e.g., clinical guidelines, research papers, reports)", 
     type=["pdf"]
@@ -101,7 +98,7 @@ else:
 
 # 7. Q&A Pipeline Section
 st.write("---")
-st.write("### 2. Ask Clinical Questions")
+st.markdown('<div class="section-title">💬 2. Ask Clinical Questions</div>', unsafe_allow_html=True)
 
 if st.session_state.retriever is not None:
     # Input field for user query
@@ -117,18 +114,18 @@ if st.session_state.retriever is not None:
                 result = run_rag_pipeline(
                     query=user_query,
                     retriever=st.session_state.retriever,
-                    llm=st.session_state.llm
+                    llm=llm
                 )
                 
                 # Display grounded answer
-                st.markdown("#### Grounded Answer:")
+                st.markdown('<div class="answer-title-text">💡 Grounded Answer:</div>', unsafe_allow_html=True)
                 st.markdown(
                     f'<div class="answer-box">{result["answer"]}</div>',
                     unsafe_allow_html=True
                 )
                 
                 # Display source references (Phase 9)
-                st.markdown("#### Retrieved Source Chunks:")
+                st.markdown('<div class="section-title" style="margin-top: 15px; font-size: 1.1rem; color: #4a5568;">📚 Retrieved Source Chunks:</div>', unsafe_allow_html=True)
                 for doc in result["source_documents"]:
                     source_name = doc.metadata.get("source", "Unknown PDF")
                     page_num = doc.metadata.get("page", 0) + 1  # 0-indexed page to 1-indexed for display

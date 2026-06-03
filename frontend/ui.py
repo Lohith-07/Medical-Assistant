@@ -16,69 +16,162 @@ def setup_page():
     st.markdown(
         """
         <style>
-        /* Base styles */
-        .main {
-            font-family: 'Inter', sans-serif;
-            background-color: #fdfdfd;
+        /* Import premium sans-serif typography */
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap');
+        
+        /* Apply fonts across the application */
+        html, body, [class*="css"], .main, .stApp {
+            font-family: 'Plus Jakarta Sans', sans-serif !important;
+            background-color: #f7fafc;
+        }
+        
+        /* Container page structure */
+        .block-container {
+            padding-top: 3rem !important;
+            padding-bottom: 5rem !important;
         }
         
         /* Custom Header Styling */
         .header-container {
             text-align: center;
-            padding: 20px 0;
-            border-bottom: 2px solid #eef2f5;
-            margin-bottom: 30px;
+            padding: 30px 20px;
+            background: linear-gradient(135deg, #1a365d 0%, #2a4365 100%);
+            border-radius: 16px;
+            margin-bottom: 35px;
+            box-shadow: 0 10px 15px -3px rgba(26, 54, 93, 0.15), 0 4px 6px -2px rgba(26, 54, 93, 0.05);
+            color: #ffffff;
+            position: relative;
+            overflow: hidden;
+        }
+        .header-container::before {
+            content: "";
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.05) 0%, transparent 60%);
+            pointer-events: none;
         }
         .header-title {
-            color: #1a365d;
             font-weight: 800;
-            font-size: 2.5rem;
-            margin-bottom: 0px;
+            font-size: 2.6rem;
+            margin-bottom: 8px;
+            letter-spacing: -0.5px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
         }
         .header-subtitle {
-            color: #4a5568;
             font-size: 1.1rem;
             font-weight: 400;
-            margin-top: 5px;
+            color: #e2e8f0;
+            max-width: 600px;
+            margin: 5px auto 0 auto;
+            line-height: 1.4;
         }
         
-        /* Citation Cards styling */
+        /* Styling Streamlit inputs: File Uploader */
+        div[data-testid="stFileUploader"] {
+            border: 2px dashed #cbd5e0 !important;
+            border-radius: 12px !important;
+            padding: 15px 25px !important;
+            background-color: #ffffff !important;
+            transition: all 0.3s ease !important;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05) !important;
+        }
+        div[data-testid="stFileUploader"]:hover {
+            border-color: #3182ce !important;
+            background-color: #ebf8ff !important;
+            box-shadow: 0 10px 15px -3px rgba(49, 130, 206, 0.1) !important;
+        }
+        
+        /* Styling Streamlit inputs: Text Input Field */
+        div[data-baseweb="input"] {
+            border-radius: 10px !important;
+            border: 1.5px solid #e2e8f0 !important;
+            background-color: #ffffff !important;
+            transition: all 0.2s ease-in-out !important;
+            padding: 2px 5px !important;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.02) !important;
+        }
+        div[data-baseweb="input"]:focus-within {
+            border-color: #3182ce !important;
+            box-shadow: 0 0 0 3px rgba(49, 130, 206, 0.18) !important;
+        }
+        
+        /* Custom section titles */
+        .section-title {
+            font-weight: 700;
+            color: #2d3748;
+            font-size: 1.25rem;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        /* Grounded Answer Card styling */
+        .answer-box {
+            background-color: #ffffff;
+            border: 1px solid #e2e8f0;
+            border-left: 5px solid #3182ce;
+            padding: 22px;
+            border-radius: 10px;
+            color: #2d3748;
+            line-height: 1.65;
+            margin-top: 15px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.02), 0 4px 6px -2px rgba(0, 0, 0, 0.02);
+            font-size: 1.05rem;
+        }
+        .answer-title-text {
+            font-weight: 700;
+            font-size: 1.15rem;
+            color: #2b6cb0;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        /* Citation / Source Cards styling with lift micro-animation */
         .source-card {
             background-color: #ffffff;
-            border-left: 4px solid #3182ce;
-            padding: 15px;
-            border-radius: 6px;
+            border: 1px solid #edf2f7;
+            border-left: 4px solid #319795; /* Medical teal accent */
+            padding: 18px;
+            border-radius: 8px;
             margin-top: 15px;
             margin-bottom: 15px;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.03), 0 2px 4px -1px rgba(0, 0, 0, 0.02);
+            transition: all 0.3s cubic-bezier(0.165, 0.84, 0.44, 1);
+        }
+        .source-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 20px -5px rgba(0, 0, 0, 0.08), 0 4px 6px -2px rgba(0, 0, 0, 0.04);
+            border-left-color: #2c7a7b;
         }
         .source-header {
             font-weight: 700;
-            color: #2b6cb0;
+            color: #2c7a7b;
             font-size: 0.95rem;
-            margin-bottom: 5px;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
         }
         .source-content {
-            font-size: 0.9rem;
-            color: #2d3748;
-            line-height: 1.5;
+            font-size: 0.92rem;
+            color: #4a5568;
+            line-height: 1.55;
+            font-style: normal;
         }
         
-        /* Answer Box Styling */
-        .answer-box {
-            background-color: #ebf8ff;
-            border: 1px solid #bee3f8;
-            padding: 20px;
-            border-radius: 8px;
-            color: #2b6cb0;
-            line-height: 1.6;
-            margin-bottom: 25px;
-        }
-        .answer-title {
-            font-weight: 700;
-            font-size: 1.1rem;
-            color: #2b6cb0;
-            margin-bottom: 8px;
+        /* Global override for status blocks */
+        div[data-testid="stNotification"] {
+            border-radius: 8px !important;
         }
         </style>
         """,
@@ -93,7 +186,7 @@ def render_header():
         """
         <div class="header-container">
             <div class="header-title">🩺 Medical RAG Assistant</div>
-            <div class="header-subtitle">Upload medical PDFs and get fully grounded answers powered by Gemini API</div>
+            <div class="header-subtitle">Analyze clinical records & guidelines securely with local vector search and grounded LLM answers</div>
         </div>
         """,
         unsafe_allow_html=True
