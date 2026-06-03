@@ -56,6 +56,10 @@ if "uploaded_filename" not in st.session_state:
     st.session_state.uploaded_filename = None
 if "retriever" not in st.session_state:
     st.session_state.retriever = None
+if "num_pages" not in st.session_state:
+    st.session_state.num_pages = 0
+if "num_chunks" not in st.session_state:
+    st.session_state.num_chunks = 0
 
 # 4. Check for Gemini API key and initialize LLM early
 api_key = os.getenv("GEMINI_API_KEY") or os.getenv("GOOGLE_API_KEY")
@@ -74,6 +78,72 @@ try:
 except Exception as e:
     st.error(f"Failed to initialize Gemini LLM: {e}")
     st.stop()
+
+# Sidebar - Developer & Technical Dashboard
+with st.sidebar:
+    st.markdown(
+        """
+        <div style="text-align: center; padding: 15px 0;">
+            <span style="font-size: 3.5rem;">🩺</span>
+            <h2 style="margin-top: 10px; color: #1a365d; font-weight: 800; font-size: 1.5rem;">RAG Dashboard</h2>
+            <p style="color: #718096; font-size: 0.85rem;">System Parameters & Configuration</p>
+        </div>
+        <hr style="margin-top: 5px; margin-bottom: 20px; border-color: #e2e8f0;"/>
+        """,
+        unsafe_allow_html=True
+    )
+    
+    st.markdown("### ⚙️ System Stack")
+    st.info(
+        "**LLM**: `gemini-2.5-flash` (Generative)\n\n"
+        "**Embeddings**: `all-MiniLM-L6-v2` (Local, 384-D)\n\n"
+        "**Vector DB**: `ChromaDB` (Persistent, Local)"
+    )
+    
+    # Active Document Stats
+    if st.session_state.retriever is not None and st.session_state.num_pages > 0:
+        st.markdown("### 📊 Active Document Stats")
+        st.markdown(
+            f"- **Pages**: {st.session_state.num_pages}\n"
+            f"- **Text Chunks**: {st.session_state.num_chunks}"
+        )
+    
+    st.markdown("### 📊 Hyperparameters")
+    st.success(
+        "**Chunk Size**: 700 characters\n\n"
+        "**Chunk Overlap**: 100 characters\n\n"
+        "**Retrieval Count (k)**: 3 context chunks"
+    )
+    
+    # Reset Database control button
+    st.markdown("### 🧹 Database Admin")
+    if st.button("Clear Vector Store", type="secondary", use_container_width=True):
+        import shutil
+        # Delete folders
+        try:
+            if os.path.exists("db"):
+                shutil.rmtree("db")
+            if os.path.exists("data"):
+                shutil.rmtree("data")
+            
+            # Reset state
+            st.session_state.uploaded_filename = None
+            st.session_state.retriever = None
+            st.session_state.num_pages = 0
+            st.session_state.num_chunks = 0
+            
+            st.success("Database cleared!")
+            st.rerun()
+        except Exception as ex:
+            st.error(f"Error resetting database: {ex}")
+    
+    st.markdown("### 🧠 Interview Insight")
+    st.warning(
+        "**Why RAG?**\n\n"
+        "Retrieval-Augmented Generation solves knowledge-cutoff and prevents hallucinations "
+        "by feeding precise context chunks directly into the LLM prompt window, generating "
+        "fully grounded medical responses with citations."
+    )
 
 # 5. Sidebar or main section for PDF upload
 st.markdown('<div class="section-title">📂 1. Upload Document</div>', unsafe_allow_html=True)
@@ -105,10 +175,12 @@ if uploaded_file is not None:
             status_text.text("Loading and extracting PDF pages...")
             progress_bar.progress(25)
             documents = load_pdf(file_path)
+            st.session_state.num_pages = len(documents)
             
             status_text.text("Splitting pages into text chunks...")
             progress_bar.progress(50)
             chunks = split_documents(documents)
+            st.session_state.num_chunks = len(chunks)
             
             status_text.text("Generating embeddings and building Chroma vector database...")
             progress_bar.progress(75)
@@ -145,8 +217,12 @@ if st.session_state.retriever is not None:
     )
     
     if user_query:
+        import time
         with st.spinner("Analyzing document and generating grounded answer..."):
             try:
+                # Start timer to measure response latency
+                start_time = time.time()
+                
                 # Run RAG
                 result = run_rag_pipeline(
                     query=user_query,
@@ -154,10 +230,17 @@ if st.session_state.retriever is not None:
                     llm=llm
                 )
                 
+                elapsed_time = time.time() - start_time
+                
                 # Display grounded answer
                 st.markdown('<div class="answer-title-text">💡 Grounded Answer:</div>', unsafe_allow_html=True)
                 st.markdown(
-                    f'<div class="answer-box">{result["answer"]}</div>',
+                    f'<div class="answer-box">'
+                    f'{result["answer"]}'
+                    f'<div style="font-size: 0.8rem; color: #718096; border-top: 1px solid #edf2f7; margin-top: 15px; padding-top: 8px; text-align: right;">'
+                    f'⏱️ Response generated in {elapsed_time:.2f} seconds'
+                    f'</div>'
+                    f'</div>',
                     unsafe_allow_html=True
                 )
                 
