@@ -25,6 +25,8 @@ if "num_pages" not in st.session_state:
     st.session_state.num_pages = 0
 if "num_chunks" not in st.session_state:
     st.session_state.num_chunks = 0
+if "embeddings" not in st.session_state:
+    st.session_state.embeddings = None
 
 # 4. Check for Gemini API key and initialize LLM early
 api_key = os.getenv("GEMINI_API_KEY") or os.getenv("GOOGLE_API_KEY")
@@ -44,112 +46,128 @@ except Exception as e:
     st.error(f"Failed to initialize Gemini LLM: {e}")
     st.stop()
 
+# Initialize local embedding model once at startup and cache it
+if st.session_state.embeddings is None:
+    try:
+        with st.spinner("Loading local semantic embedding model (once at startup)..."):
+            st.session_state.embeddings = get_embedding_model()
+    except Exception as e:
+        st.error(f"Failed to load local embedding model: {e}")
+        st.stop()
 
+# 5. Document Ingestion Section
+st.markdown('<div class="section-title">📂 Document Database</div>', unsafe_allow_html=True)
 
-# 5. Sidebar or main section for PDF upload
-st.markdown('<div class="section-title">📂 1. Upload Document</div>', unsafe_allow_html=True)
-
-col1, col2 = st.columns([3, 1])
-with col1:
+if st.session_state.retriever is None:
+    # No document loaded: show uploader
     uploaded_file = st.file_uploader(
         "Upload a medical PDF (e.g., clinical guidelines, research papers, reports)", 
         type=["pdf"],
         label_visibility="collapsed"
     )
-with col2:
-    # Vertical spacer to align button with file uploader height
-    st.markdown('<div style="margin-top: 28px;"></div>', unsafe_allow_html=True)
-    if st.button("🧹 Clear DB", type="primary", use_container_width=True):
-        try:
-            # 1. Delete Chroma DB collection to release handles and clear vectors
-            if st.session_state.retriever is not None:
-                try:
-                    st.session_state.retriever.vectorstore.delete_collection()
-                except Exception:
-                    pass
-            
-            # 2. Reset session state variables
-            st.session_state.uploaded_filename = None
+    
+    if uploaded_file is not None:
+        if st.session_state.uploaded_filename != uploaded_file.name:
+            st.session_state.uploaded_filename = uploaded_file.name
             st.session_state.retriever = None
-            st.session_state.num_pages = 0
-            st.session_state.num_chunks = 0
             
-            # 3. Clean up the data directory (not locked)
-            import shutil
-            if os.path.exists("data"):
-                try:
-                    shutil.rmtree("data")
-                except Exception:
-                    pass
+            # Ensure the data directory exists
             os.makedirs("data", exist_ok=True)
             
-            # 4. Clean up the db directory (we catch PermissionErrors in case Windows locks SQLite)
-            if os.path.exists("db"):
-                try:
-                    shutil.rmtree("db")
-                except PermissionError:
-                    # Windows file lock warning workaround. 
-                    # The collection is already deleted, so the database is empty.
-                    pass
-            os.makedirs("db", exist_ok=True)
+            # Save file to disk
+            file_path = os.path.join("data", uploaded_file.name)
+            with open(file_path, "wb") as f:
+                f.write(uploaded_file.getbuffer())
+                
+            # Run Ingestion
+            status_text = st.empty()
+            progress_bar = st.progress(0)
             
-            st.success("Database cleared successfully!")
-            st.rerun()
-        except Exception as ex:
-            st.error(f"Error resetting database: {ex}")
-
-# 6. Ingestion Pipeline
-if uploaded_file is not None:
-    # If the file is different from the last processed file, run the ingestion pipeline
-    if st.session_state.uploaded_filename != uploaded_file.name:
-        st.session_state.uploaded_filename = uploaded_file.name
-        st.session_state.retriever = None  # Reset retriever for new document
-        
-        # Ensure the data directory exists
-        os.makedirs("data", exist_ok=True)
-        
-        # Save file to disk
-        file_path = os.path.join("data", uploaded_file.name)
-        with open(file_path, "wb") as f:
-            f.write(uploaded_file.getbuffer())
-            
-        # Run Ingestion
-        status_text = st.empty()
-        progress_bar = st.progress(0)
-        
-        try:
-            status_text.text("Loading and extracting PDF pages...")
-            progress_bar.progress(25)
-            documents = load_pdf(file_path)
-            st.session_state.num_pages = len(documents)
-            
-            status_text.text("Splitting pages into text chunks...")
-            progress_bar.progress(50)
-            chunks = split_documents(documents)
-            st.session_state.num_chunks = len(chunks)
-            
-            status_text.text("Generating embeddings and building Chroma vector database...")
-            progress_bar.progress(75)
-            embeddings = get_embedding_model()
-            vector_store = create_vector_store(chunks, embeddings, persist_directory="db")
-            
-            status_text.text("Initializing retriever...")
-            progress_bar.progress(100)
-            st.session_state.retriever = get_retriever(vector_store, k=3)
-            
-            status_text.empty()
-            progress_bar.empty()
-            st.success(f"Successfully processed and indexed '{uploaded_file.name}'!")
-            
-        except Exception as e:
-            status_text.empty()
-            progress_bar.empty()
-            st.error(f"An error occurred during document ingestion: {e}")
-            st.session_state.retriever = None
+            try:
+                status_text.text("Loading and extracting PDF pages...")
+                progress_bar.progress(25)
+                documents = load_pdf(file_path)
+                st.session_state.num_pages = len(documents)
+                
+                status_text.text("Splitting pages into text chunks...")
+                progress_bar.progress(50)
+                chunks = split_documents(documents)
+                st.session_state.num_chunks = len(chunks)
+                
+                status_text.text("Generating embeddings and building Chroma vector database...")
+                progress_bar.progress(75)
+                # Reuse cached embeddings
+                vector_store = create_vector_store(chunks, st.session_state.embeddings, persist_directory="db")
+                
+                status_text.text("Initializing retriever...")
+                progress_bar.progress(100)
+                st.session_state.retriever = get_retriever(vector_store, k=3)
+                
+                status_text.empty()
+                progress_bar.empty()
+                st.success(f"Successfully processed and indexed '{uploaded_file.name}'!")
+                st.rerun()
+                
+            except Exception as e:
+                status_text.empty()
+                progress_bar.empty()
+                st.error(f"An error occurred during document ingestion: {e}")
+                st.session_state.retriever = None
 else:
-    # If file is removed, reset state
-    st.session_state.uploaded_filename = None
-    st.session_state.retriever = None
+    # Document already loaded: hide uploader and show active stats card with Clear DB button next to it
+    col1, col2 = st.columns([3, 1])
+    with col1:
+        st.markdown(
+            f"""
+            <div style="background-color: #ffffff; padding: 18px; border-radius: 12px; border-left: 6px solid #FFBF25; box-shadow: 0 4px 6px rgba(0,0,0,0.02); margin-bottom: 25px;">
+                <span style="font-weight: 800; color: #282B3A; font-size: 1.1rem; display: block;">📄 Active Knowledge Base</span>
+                <span style="color: #FB493D; font-weight: 600; font-size: 0.95rem;">{st.session_state.uploaded_filename}</span>
+                <span style="color: #718096; font-size: 0.85rem; display: block; margin-top: 4px;">📊 {st.session_state.num_pages} pages | {st.session_state.num_chunks} text chunks indexed</span>
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
+    with col2:
+        # Vertical spacer to align button with card height
+        st.markdown('<div style="margin-top: 20px;"></div>', unsafe_allow_html=True)
+        if st.button("🧹 Clear DB", type="primary", use_container_width=True):
+            try:
+                # 1. Delete Chroma DB collection to release handles and clear vectors
+                if st.session_state.retriever is not None:
+                    try:
+                        st.session_state.retriever.vectorstore.delete_collection()
+                    except Exception:
+                        pass
+                
+                # 2. Reset session state variables
+                st.session_state.uploaded_filename = None
+                st.session_state.retriever = None
+                st.session_state.num_pages = 0
+                st.session_state.num_chunks = 0
+                
+                # 3. Clean up the data directory (not locked)
+                import shutil
+                if os.path.exists("data"):
+                    try:
+                        shutil.rmtree("data")
+                    except Exception:
+                        pass
+                os.makedirs("data", exist_ok=True)
+                
+                # 4. Clean up the db directory (we catch PermissionErrors in case Windows locks SQLite)
+                if os.path.exists("db"):
+                    try:
+                        shutil.rmtree("db")
+                    except PermissionError:
+                        # Windows file lock warning workaround. 
+                        # The collection is already deleted, so the database is empty.
+                        pass
+                os.makedirs("db", exist_ok=True)
+                
+                st.success("Database cleared successfully!")
+                st.rerun()
+            except Exception as ex:
+                st.error(f"Error resetting database: {ex}")
 
 # 7. Q&A Pipeline Section
 st.write("---")
