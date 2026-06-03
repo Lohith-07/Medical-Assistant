@@ -1,24 +1,29 @@
-# Virtual environment (not needed — use: pip install -r requirements.txt)
+# Medical RAG Assistant — .gitignore
+
+# Virtual environments (if anyone clones and sets up locally)
 venv/
+.venv/
+env/
+
+# API keys — NEVER commit these
+.env
+*.key
+secrets.json
 
 # Python cache
 __pycache__/
 *.pyc
 *.pyo
 
-# Environment variables (NEVER commit API keys)
-.env
-
-# Editor config
-.idea/
-.vscode/
-
-# ChromaDB vector store (auto-generated when notebook runs)
-chroma_db/
-db/
-
-# Uploaded PDF files (user-specific)
-data/
-
-# Jupyter checkpoints (auto-generated)
+# Jupyter checkpoints
 .ipynb_checkpoints/
+
+# ChromaDB vector store (auto-generated, large)
+chroma_db/
+
+# HuggingFace model cache (auto-downloaded, ~90MB)
+.cache/
+
+# OS files
+.DS_Store
+Thumbs.db
