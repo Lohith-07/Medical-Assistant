@@ -126,47 +126,137 @@ def setup_page():
         }
         
         /* Styling Streamlit inputs: File Uploader */
-        /* Hide native Streamlit file uploader container completely */
-        div[data-testid="stFileUploader"] {
+        /* Hide native Streamlit file uploader and internal controls completely */
+        div[data-testid="stFileUploader"],
+        .hidden-native-controls {
             display: none !important;
         }
         
-        /* Custom Upload Button Styling */
-        .upload-wrapper {
+        /* Premium Document Database Card styling */
+        .db-section-card {
+            background: #ffffff;
+            padding: 24px;
+            border-radius: 16px;
+            border-left: 6px solid #FFBF25; /* Gold Accent line */
+            box-shadow: 0 10px 25px -5px rgba(40, 43, 58, 0.05), 0 8px 10px -6px rgba(40, 43, 58, 0.03);
+            margin-bottom: 25px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        
+        .db-controls-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 16px;
+        }
+        
+        .db-upload-control {
             display: flex;
             align-items: center;
             gap: 16px;
-            margin-top: 10px;
-            margin-bottom: 10px;
+            flex-wrap: wrap;
         }
         
-        .upload-btn {
-            background: #d9dee3;
-            color: #282B3A !important;
+        .custom-upload-btn {
+            background: #282B3A;
+            color: #ffffff !important;
             padding: 12px 24px;
             border-radius: 10px;
             cursor: pointer;
-            font-size: 16px;
-            font-weight: 500;
-            border: 1px solid #b8c0c7;
+            font-size: 15px;
+            font-weight: 600;
+            border: none;
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            transition: background 0.2s ease;
+            gap: 8px;
+            transition: all 0.2s ease-in-out;
+            box-shadow: 0 4px 6px rgba(40, 43, 58, 0.15);
         }
         
-        .upload-btn:hover {
-            background: #cfd6dc;
-            color: #282B3A !important;
+        .custom-upload-btn:hover {
+            background: #FB493D; /* Coral Red hover */
+            transform: translateY(-1px);
+            box-shadow: 0 6px 12px rgba(251, 73, 61, 0.2);
+        }
+        
+        .upload-info-text {
+            color: #718096;
+            font-size: 14px;
         }
         
         #pdf-upload {
-            display: none;
+            display: none !important;
         }
         
-        .upload-info {
-            color: #555 !important;
+        .custom-clear-btn {
+            background: transparent;
+            color: #FB493D !important;
+            border: 1.5px solid #FB493D;
+            padding: 10px 20px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            transition: all 0.2s ease-in-out;
+        }
+        
+        .custom-clear-btn:hover {
+            background: #FB493D;
+            color: #ffffff !important;
+            box-shadow: 0 4px 10px rgba(251, 73, 61, 0.15);
+        }
+        
+        /* Active file tags styling */
+        .active-files-container {
+            border-top: 1px solid #edf2f7;
+            padding-top: 18px;
+        }
+        
+        .active-files-title {
+            font-weight: 700;
+            font-size: 13px;
+            color: #718096;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 10px;
+        }
+        
+        .files-tags-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 8px;
+        }
+        
+        .file-tag {
+            background: #f7fafc;
+            border: 1px solid #e2e8f0;
+            color: #282B3A;
+            padding: 6px 12px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+        
+        .file-tag-icon {
             font-size: 15px;
+        }
+        
+        .files-stats {
+            font-size: 13px;
+            color: #718096;
+            margin-top: 4px;
         }
         
         /* Styling Streamlit inputs: Text Input Field */

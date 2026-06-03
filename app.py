@@ -60,20 +60,81 @@ if st.session_state.embeddings is None:
 # 5. Document Ingestion Section
 st.markdown('<div class="section-title">📂 Document Database</div>', unsafe_allow_html=True)
 
-col1, col2 = st.columns([3, 1])
-with col1:
-    uploaded_files = st.file_uploader(
-        "Upload medical PDFs (e.g., clinical guidelines, research papers, reports)", 
-        type=["pdf"],
-        accept_multiple_files=True,
-        label_visibility="collapsed",
-        key=st.session_state.uploader_key
-    )
-    st.markdown(
-        """
-        <div class="upload-wrapper">
-          <label for="pdf-upload" class="upload-btn">
-            Upload PDF
+# 1. Render hidden native controls (wrapped in a hidden div)
+st.markdown('<div class="hidden-native-controls">', unsafe_allow_html=True)
+uploaded_files = st.file_uploader(
+    "Upload medical PDFs", 
+    type=["pdf"],
+    accept_multiple_files=True,
+    label_visibility="collapsed",
+    key=st.session_state.uploader_key
+)
+trigger_clear = st.button("🧹 Clear DB Internal", type="primary")
+st.markdown('</div>', unsafe_allow_html=True)
+
+# 2. Handle the database clearing trigger
+if trigger_clear:
+    try:
+        # Delete collection to release handles
+        if st.session_state.retriever is not None:
+            try:
+                st.session_state.retriever.vectorstore.delete_collection()
+            except Exception:
+                pass
+        
+        st.session_state.uploaded_filenames = []
+        st.session_state.retriever = None
+        st.session_state.num_pages = 0
+        st.session_state.num_chunks = 0
+        
+        # Rotate uploader key to force reset widget
+        import time
+        st.session_state.uploader_key = f"uploader_{int(time.time())}"
+        
+        # Clean directories
+        import shutil
+        if os.path.exists("data"):
+            try:
+                shutil.rmtree("data")
+            except Exception:
+                pass
+        os.makedirs("data", exist_ok=True)
+        
+        if os.path.exists("db"):
+            try:
+                shutil.rmtree("db")
+            except PermissionError:
+                pass
+        os.makedirs("db", exist_ok=True)
+        
+        st.success("Database cleared successfully!")
+        st.rerun()
+    except Exception as ex:
+        st.error(f"Error resetting database: {ex}")
+
+# 3. Compile list of active files inside the custom card
+files_list_html = ""
+if st.session_state.retriever is not None and st.session_state.uploaded_filenames:
+    files_tags = "".join([
+        f'<div class="file-tag"><span class="file-tag-icon">📄</span> {fname}</div>'
+        for fname in st.session_state.uploaded_filenames
+    ])
+    files_list_html = f"""
+    <div class="active-files-container">
+        <div class="active-files-title">Active Knowledge Base:</div>
+        <div class="files-tags-grid">{files_tags}</div>
+        <div class="files-stats">📊 {st.session_state.num_pages} pages | {st.session_state.num_chunks} text chunks indexed</div>
+    </div>
+    """
+
+# 4. Render clean unified custom card UI with inline styling and script
+st.markdown(
+    f"""
+    <div class="db-section-card">
+      <div class="db-controls-row">
+        <div class="db-upload-control">
+          <label for="pdf-upload" class="custom-upload-btn">
+            📤 Upload Medical PDFs
           </label>
           <input
             id="pdf-upload"
@@ -81,56 +142,59 @@ with col1:
             accept=".pdf"
             multiple
           />
-          <span class="upload-info">
-            200MB per file • PDF
+          <span class="upload-info-text">
+            Supports multiple PDFs up to 200MB
           </span>
         </div>
-        """,
-        unsafe_allow_html=True
-    )
-with col2:
-    # Vertical spacer to align button with file uploader height
-    st.markdown('<div style="margin-top: 28px;"></div>', unsafe_allow_html=True)
-    if st.button("🧹 Clear DB", type="primary", use_container_width=True):
-        try:
-            # 1. Delete Chroma DB collection to release handles and clear vectors
-            if st.session_state.retriever is not None:
-                try:
-                    st.session_state.retriever.vectorstore.delete_collection()
-                except Exception:
-                    pass
-            
-            # 2. Reset session state variables
-            st.session_state.uploaded_filenames = []
-            st.session_state.retriever = None
-            st.session_state.num_pages = 0
-            st.session_state.num_chunks = 0
-            
-            # 3. Rotate uploader key to force reset the widget
-            import time
-            st.session_state.uploader_key = f"uploader_{int(time.time())}"
-            
-            # 4. Clean up the data directory (not locked)
-            import shutil
-            if os.path.exists("data"):
-                try:
-                    shutil.rmtree("data")
-                except Exception:
-                    pass
-            os.makedirs("data", exist_ok=True)
-            
-            # 5. Clean up the db directory (we catch PermissionErrors in case Windows locks SQLite)
-            if os.path.exists("db"):
-                try:
-                    shutil.rmtree("db")
-                except PermissionError:
-                    pass
-            os.makedirs("db", exist_ok=True)
-            
-            st.success("Database cleared successfully!")
-            st.rerun()
-        except Exception as ex:
-            st.error(f"Error resetting database: {ex}")
+        <div class="db-action-control">
+          <button id="custom-clear-btn" class="custom-clear-btn">
+            🧹 Clear Database
+          </button>
+        </div>
+      </div>
+      {files_list_html}
+    </div>
+    
+    <script>
+    function setupCustomListeners() {{
+        const customInput = document.getElementById('pdf-upload');
+        const customClearBtn = document.getElementById('custom-clear-btn');
+        
+        if (customInput) {{
+            customInput.removeEventListener('change', handleUploadChange);
+            customInput.addEventListener('change', handleUploadChange);
+        }}
+        if (customClearBtn) {{
+            customClearBtn.removeEventListener('click', handleClearClick);
+            customClearBtn.addEventListener('click', handleClearClick);
+        }}
+    }}
+    
+    function handleUploadChange(e) {{
+        const customInput = e.target;
+        const nativeInput = document.querySelector('.hidden-native-controls input[type="file"]');
+        if (nativeInput && customInput.files.length > 0) {{
+            const dataTransfer = new DataTransfer();
+            for (let i = 0; i < customInput.files.length; i++) {{
+                dataTransfer.items.add(customInput.files[i]);
+            }}
+            nativeInput.files = dataTransfer.files;
+            nativeInput.dispatchEvent(new Event('change', {{ bubbles: true }}));
+        }}
+    }}
+    
+    function handleClearClick() {{
+        const nativeClearBtn = document.querySelector('.hidden-native-controls button');
+        if (nativeClearBtn) {{
+            nativeClearBtn.click();
+        }}
+    }}
+    
+    setupCustomListeners();
+    </script>
+    """,
+    unsafe_allow_html=True
+)
 
 # Ingestion Pipeline
 if uploaded_files:
@@ -254,19 +318,7 @@ elif st.session_state.uploaded_filenames:
     except Exception as ex:
         st.error(f"Error resetting database: {ex}")
 
-# Active Knowledge Base Card below the uploader columns
-if st.session_state.retriever is not None and st.session_state.uploaded_filenames:
-    files_html = "".join([f'<div style="color: #FB493D; font-weight: 600; font-size: 0.95rem; margin-top: 2px;">• {fname}</div>' for fname in st.session_state.uploaded_filenames])
-    st.markdown(
-        f"""
-        <div style="background-color: #ffffff; padding: 18px; border-radius: 12px; border-left: 6px solid #FFBF25; box-shadow: 0 4px 6px rgba(0,0,0,0.02); margin-top: 15px; margin-bottom: 25px;">
-            <span style="font-weight: 800; color: #282B3A; font-size: 1.1rem; display: block; margin-bottom: 5px;">📄 Active Knowledge Base ({len(st.session_state.uploaded_filenames)} files)</span>
-            {files_html}
-            <span style="color: #718096; font-size: 0.85rem; display: block; margin-top: 8px; border-top: 1px solid #edf2f7; padding-top: 6px;">📊 {st.session_state.num_pages} pages | {st.session_state.num_chunks} text chunks indexed</span>
-        </div>
-        """,
-        unsafe_allow_html=True
-    )
+# Duplicate active card removed (rendered inside the main container card)
 
 # 7. Q&A Pipeline Section
 st.write("---")
