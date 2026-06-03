@@ -161,6 +161,16 @@ def setup_page():
             box-shadow: 0 4px 8px rgba(251, 73, 61, 0.2) !important;
         }
         
+        /* Hide the icon inside the file uploader button to prevent duplicate text */
+        div[data-testid="stFileUploader"] button svg,
+        div[data-testid="stFileUploader"] button [data-testid="stIconMaterial"],
+        div[data-testid="stFileUploader"] button [class*="Icon"],
+        div[data-testid="stFileUploader"] button [class*="icon"],
+        div[data-testid="stFileUploader"] button .material-icons,
+        div[data-testid="stFileUploader"] button i {
+            display: none !important;
+        }
+        
         /* Styling Streamlit inputs: Text Input Field */
         div[data-baseweb="input"] {
             border-radius: 10px !important;
