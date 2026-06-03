@@ -42,7 +42,7 @@ def setup_page():
         }
         
         /* Force global text color to Deep Slate */
-        p, span, h1, h2, h3, h4, h5, h6, label, li, small, .stApp div {
+        p, span, h1, h2, h3, h4, h5, h6, label, li, small {
             color: #282B3A !important;
         }
         
@@ -54,13 +54,10 @@ def setup_page():
             color: #FFBF25 !important;
         }
         
-        /* Force White sidebar background and Deep Slate text */
-        section[data-testid="stSidebar"], [data-testid="stSidebarUserContent"], [data-testid="stSidebarNav"] {
-            background-color: #ffffff !important;
-            border-right: 1.5px solid #282B3A !important;
-        }
-        section[data-testid="stSidebar"] *, [data-testid="stSidebarUserContent"] * {
-            color: #282B3A !important;
+        /* Completely hide the sidebar pane and its toggle buttons */
+        [data-testid="stSidebar"], [data-testid="stSidebarCollapseButton"], section[data-testid="stSidebar"] {
+            display: none !important;
+            width: 0px !important;
         }
         
         /* Container page structure */
