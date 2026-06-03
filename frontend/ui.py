@@ -24,23 +24,42 @@ def setup_page():
         @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap');
         
         /* Injected Streamlit theme overrides to force the custom color palette */
-        :root {
+        :root, .stApp, [data-testid="stAppViewContainer"], [data-testid="stSidebar"] {
             --background-color: #D7DFE2 !important;
             --secondary-background-color: #ffffff !important;
             --text-color: #282B3A !important;
             --primary-color: #FB493D !important;
         }
         
-        /* Apply fonts and global Soft Ice Blue background */
-        html, body, [class*="css"], .main, .stApp {
+        /* Force typography globally */
+        html, body, [class*="css"], .main, .stApp, .stApp * {
             font-family: 'Plus Jakarta Sans', sans-serif !important;
+        }
+        
+        /* Force background color on all main app viewports */
+        html, body, .stApp, [data-testid="stAppViewContainer"], [data-testid="stHeader"], [data-testid="stAppViewBlockContainer"], .main {
             background-color: #D7DFE2 !important;
+        }
+        
+        /* Force global text color to Deep Slate */
+        p, span, h1, h2, h3, h4, h5, h6, label, li, small, .stApp div {
             color: #282B3A !important;
         }
         
-        /* Force background color on main container viewports */
-        [data-testid="stAppViewContainer"], .stApp, [data-testid="stHeader"] {
-            background-color: #D7DFE2 !important;
+        /* Exclude header container text from global deep slate override */
+        .header-container, .header-container *, .header-container p, .header-container div, .header-container h1, .header-container h2 {
+            color: #ffffff !important;
+        }
+        .header-title, .header-title * {
+            color: #FFBF25 !important;
+        }
+        
+        /* Force White sidebar background and Deep Slate text */
+        section[data-testid="stSidebar"], [data-testid="stSidebarUserContent"], [data-testid="stSidebarNav"] {
+            background-color: #ffffff !important;
+            border-right: 1.5px solid #282B3A !important;
+        }
+        section[data-testid="stSidebar"] *, [data-testid="stSidebarUserContent"] * {
             color: #282B3A !important;
         }
         

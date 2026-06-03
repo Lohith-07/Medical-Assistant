@@ -14,41 +14,6 @@ setup_page()
 # 2. Render Page Header
 render_header()
 
-# Sidebar - Developer & Technical Dashboard
-with st.sidebar:
-    st.markdown(
-        """
-        <div style="text-align: center; padding: 15px 0;">
-            <span style="font-size: 3.5rem;">🩺</span>
-            <h2 style="margin-top: 10px; color: #1a365d; font-weight: 800; font-size: 1.5rem;">RAG Dashboard</h2>
-            <p style="color: #718096; font-size: 0.85rem;">System Parameters & Configuration</p>
-        </div>
-        <hr style="margin-top: 5px; margin-bottom: 20px; border-color: #e2e8f0;"/>
-        """,
-        unsafe_allow_html=True
-    )
-    
-    st.markdown("### ⚙️ System Stack")
-    st.info(
-        "**LLM**: `gemini-2.5-flash` (Generative)\n\n"
-        "**Embeddings**: `all-MiniLM-L6-v2` (Local, 384-D)\n\n"
-        "**Vector DB**: `ChromaDB` (Persistent, Local)"
-    )
-    
-    st.markdown("### 📊 Hyperparameters")
-    st.success(
-        "**Chunk Size**: 700 characters\n\n"
-        "**Chunk Overlap**: 100 characters\n\n"
-        "**Retrieval Count (k)**: 3 context chunks"
-    )
-    
-    st.markdown("### 🧠 Interview Insight")
-    st.warning(
-        "**Why RAG?**\n\n"
-        "Retrieval-Augmented Generation solves knowledge-cutoff and prevents hallucinations "
-        "by feeding precise context chunks directly into the LLM prompt window, generating "
-        "fully grounded medical responses with citations."
-    )
 
 
 # 3. Initialize Streamlit session state variables
@@ -115,9 +80,30 @@ with st.sidebar:
         "**Retrieval Count (k)**: 3 context chunks"
     )
     
-    # Reset Database control button
-    st.markdown("### 🧹 Database Admin")
-    if st.button("Clear Vector Store", type="secondary", use_container_width=True):
+
+    
+    st.markdown("### 🧠 Interview Insight")
+    st.warning(
+        "**Why RAG?**\n\n"
+        "Retrieval-Augmented Generation solves knowledge-cutoff and prevents hallucinations "
+        "by feeding precise context chunks directly into the LLM prompt window, generating "
+        "fully grounded medical responses with citations."
+    )
+
+# 5. Sidebar or main section for PDF upload
+st.markdown('<div class="section-title">📂 1. Upload Document</div>', unsafe_allow_html=True)
+
+col1, col2 = st.columns([3, 1])
+with col1:
+    uploaded_file = st.file_uploader(
+        "Upload a medical PDF (e.g., clinical guidelines, research papers, reports)", 
+        type=["pdf"],
+        label_visibility="collapsed"
+    )
+with col2:
+    # Vertical spacer to align button with file uploader height
+    st.markdown('<div style="margin-top: 28px;"></div>', unsafe_allow_html=True)
+    if st.button("🧹 Clear DB", type="primary", use_container_width=True):
         try:
             # 1. Delete Chroma DB collection to release handles and clear vectors
             if st.session_state.retriever is not None:
@@ -155,21 +141,6 @@ with st.sidebar:
             st.rerun()
         except Exception as ex:
             st.error(f"Error resetting database: {ex}")
-    
-    st.markdown("### 🧠 Interview Insight")
-    st.warning(
-        "**Why RAG?**\n\n"
-        "Retrieval-Augmented Generation solves knowledge-cutoff and prevents hallucinations "
-        "by feeding precise context chunks directly into the LLM prompt window, generating "
-        "fully grounded medical responses with citations."
-    )
-
-# 5. Sidebar or main section for PDF upload
-st.markdown('<div class="section-title">📂 1. Upload Document</div>', unsafe_allow_html=True)
-uploaded_file = st.file_uploader(
-    "Upload a medical PDF (e.g., clinical guidelines, research papers, reports)", 
-    type=["pdf"]
-)
 
 # 6. Ingestion Pipeline
 if uploaded_file is not None:
