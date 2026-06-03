@@ -58,7 +58,22 @@ if st.session_state.embeddings is None:
         st.stop()
 
 # 5. Document Ingestion Section
-st.markdown('<div class="section-title">📂 Document Database</div>', unsafe_allow_html=True)
+st.markdown(
+    """
+    <div class="max-w-4xl">
+      <!-- Section Title -->
+      <div style="margin-bottom: 24px;">
+        <h2 class="section-title-custom">
+          <span>📁</span> Document Database
+        </h2>
+        <p class="section-subtitle-custom">
+          Upload and manage medical PDFs for the AI clinical assistant.
+        </p>
+      </div>
+    </div>
+    """,
+    unsafe_allow_html=True
+)
 
 # 1. Render hidden native controls (wrapped in a hidden div)
 st.markdown('<div class="hidden-native-controls">', unsafe_allow_html=True)
@@ -114,51 +129,79 @@ if trigger_clear:
 
 # 3. Compile list of active files inside the custom card
 files_list_html = ""
+clear_disabled = "disabled"
 if st.session_state.retriever is not None and st.session_state.uploaded_filenames:
-    files_tags = "".join([
-        f'<div class="file-tag"><span class="file-tag-icon">📄</span> {fname}</div>'
-        for fname in st.session_state.uploaded_filenames
-    ])
+    clear_disabled = ""
+    file_cards = []
+    for fname in st.session_state.uploaded_filenames:
+        file_cards.append(f"""
+        <div class="file-card-row">
+          <div class="file-card-left">
+            <span class="file-card-icon">📄</span>
+            <div class="file-card-details">
+              <span class="file-card-name" title="{fname}">{fname}</span>
+              <span class="file-card-size">Active PDF Document</span>
+            </div>
+          </div>
+          <button class="file-card-remove-btn" onclick="triggerNativeClear()">
+            ✕
+          </button>
+        </div>
+        """)
+    
     files_list_html = f"""
-    <div class="active-files-container">
-        <div class="active-files-title">Active Knowledge Base:</div>
-        <div class="files-tags-grid">{files_tags}</div>
-        <div class="files-stats">📊 {st.session_state.num_pages} pages | {st.session_state.num_chunks} text chunks indexed</div>
+    <div class="file-list-container">
+      <h4 class="file-list-header">Selected Files ({len(st.session_state.uploaded_filenames)})</h4>
+      <div class="file-list-grid">
+        {"".join(file_cards)}
+      </div>
+      <div class="file-list-stats">
+        📊 {st.session_state.num_pages} pages | {st.session_state.num_chunks} text chunks indexed and ready for Q&A.
+      </div>
     </div>
     """
 
 # 4. Render clean unified custom card UI with inline styling and script
 st.markdown(
     f"""
-    <div class="db-section-card">
-      <div class="db-controls-row">
-        <div class="db-upload-control">
-          <label for="pdf-upload" class="custom-upload-btn">
-            📤 Upload Medical PDFs
-          </label>
-          <input
-            id="pdf-upload"
-            type="file"
-            accept=".pdf"
-            multiple
-          />
-          <span class="upload-info-text">
-            Supports multiple PDFs up to 200MB
-          </span>
-        </div>
-        <div class="db-action-control">
-          <button id="custom-clear-btn" class="custom-clear-btn">
+    <div class="max-w-4xl">
+      <div class="upload-section-card">
+        <!-- Dropzone Area -->
+        <label for="pdf-upload" class="upload-dropzone" id="dropzone">
+          <div class="dropzone-icon">📤</div>
+          <h3 class="dropzone-title">Upload Medical PDFs</h3>
+          <p class="dropzone-subtitle">Drag & drop PDFs here or browse files</p>
+          <span class="dropzone-info">Supports multiple PDF files up to 200MB each</span>
+        </label>
+        
+        <input
+          id="pdf-upload"
+          type="file"
+          accept=".pdf"
+          multiple
+          style="display: none;"
+        />
+        
+        <!-- Selected Files List -->
+        {files_list_html}
+        
+        <!-- Bottom Actions -->
+        <div class="actions-row">
+          <button id="custom-clear-btn" class="btn-danger-outline" {clear_disabled}>
             🧹 Clear Database
           </button>
+          <label for="pdf-upload" class="btn-primary">
+            🚀 Upload Files
+          </label>
         </div>
       </div>
-      {files_list_html}
     </div>
     
     <script>
-    function setupCustomListeners() {{
+    function setupCustomUploader() {{
         const customInput = document.getElementById('pdf-upload');
         const customClearBtn = document.getElementById('custom-clear-btn');
+        const dropzone = document.getElementById('dropzone');
         
         if (customInput) {{
             customInput.removeEventListener('change', handleUploadChange);
@@ -167,6 +210,17 @@ st.markdown(
         if (customClearBtn) {{
             customClearBtn.removeEventListener('click', handleClearClick);
             customClearBtn.addEventListener('click', handleClearClick);
+        }}
+        
+        // Drag and Drop implementation
+        if (dropzone) {{
+            dropzone.removeEventListener('dragover', handleDragOver);
+            dropzone.removeEventListener('dragleave', handleDragLeave);
+            dropzone.removeEventListener('drop', handleDrop);
+            
+            dropzone.addEventListener('dragover', handleDragOver);
+            dropzone.addEventListener('dragleave', handleDragLeave);
+            dropzone.addEventListener('drop', handleDrop);
         }}
     }}
     
@@ -190,7 +244,53 @@ st.markdown(
         }}
     }}
     
-    setupCustomListeners();
+    function triggerNativeClear() {{
+        handleClearClick();
+    }}
+    
+    function handleDragOver(e) {{
+        e.preventDefault();
+        const dropzone = document.getElementById('dropzone');
+        if (dropzone) {{
+            dropzone.classList.add('dragover');
+        }}
+    }}
+    
+    function handleDragLeave(e) {{
+        const dropzone = document.getElementById('dropzone');
+        if (dropzone) {{
+            dropzone.classList.remove('dragover');
+        }}
+    }}
+    
+    function handleDrop(e) {{
+        e.preventDefault();
+        const dropzone = document.getElementById('dropzone');
+        if (dropzone) {{
+            dropzone.classList.remove('dragover');
+        }}
+        
+        const customInput = document.getElementById('pdf-upload');
+        const nativeInput = document.querySelector('.hidden-native-controls input[type="file"]');
+        if (nativeInput && e.dataTransfer.files.length > 0) {{
+            // Filter only PDFs
+            const dataTransfer = new DataTransfer();
+            for (let i = 0; i < e.dataTransfer.files.length; i++) {{
+                const file = e.dataTransfer.files[i];
+                if (file.type === 'application/pdf' || file.name.toLowerCase().endsWith('.pdf')) {{
+                    dataTransfer.items.add(file);
+                }}
+            }}
+            if (dataTransfer.files.length > 0) {{
+                nativeInput.files = dataTransfer.files;
+                nativeInput.dispatchEvent(new Event('change', {{ bubbles: true }}));
+            }} else {{
+                alert('Only PDF files are supported.');
+            }}
+        }}
+    }}
+    
+    setupCustomUploader();
     </script>
     """,
     unsafe_allow_html=True

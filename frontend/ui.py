@@ -3,7 +3,7 @@ import streamlit as st
 def setup_page():
     """
     Sets up the Streamlit page configurations and injects custom CSS 
-    for a clean, professional medical assistant theme using the user's color palette.
+    for a clean, professional healthcare AI assistant theme using Inter font and modern layout.
     """
     st.set_page_config(
         page_title="Medical RAG Assistant",
@@ -13,61 +13,49 @@ def setup_page():
     )
     
     # Custom CSS applying the requested color palette:
-    # - Coral Red: #FB493D
-    # - Deep Slate: #282B3A
-    # - Soft Ice Blue: #D7DFE2
-    # - Warm Gold: #FFBF25
+    # - Accent Blue: #2563eb
+    # - Danger Red: #ef4444
+    # - Background: #f3f4f6 (Light Gray)
+    # - Cards Background: #ffffff (White)
     st.markdown(
         """
         <style>
-        /* Import premium sans-serif typography */
-        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap');
+        /* Import Inter Font */
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
         
         /* Injected Streamlit theme overrides to force the custom color palette */
         :root, .stApp, [data-testid="stAppViewContainer"], [data-testid="stSidebar"] {
-            --background-color: #D7DFE2 !important;
+            --background-color: #f3f4f6 !important;
             --secondary-background-color: #ffffff !important;
-            --text-color: #282B3A !important;
-            --primary-color: #FB493D !important;
+            --text-color: #1f2937 !important;
+            --primary-color: #2563eb !important;
         }
         
-        /* Force typography globally on standard text containers, avoiding icon font overrides */
+        /* Force typography globally */
         html, body, .main, .stApp, p, h1, h2, h3, h4, h5, h6, label, li, small, input, textarea {
-            font-family: 'Plus Jakarta Sans', sans-serif !important;
+            font-family: 'Inter', sans-serif !important;
         }
         
-        /* Force typography on buttons without !important to prevent inheritance overrides on icons */
         button {
-            font-family: 'Plus Jakarta Sans', sans-serif;
-        }
-        
-        /* Restore font family for Streamlit's Material Icons/Symbols to prevent text rendering */
-        [data-testid="stIconMaterial"], 
-        [class*="Icon"], 
-        [class*="icon"], 
-        .material-icons, 
-        i, 
-        span[class*="icon"], 
-        span[class*="Icon"] {
-            font-family: 'Material Symbols Rounded', 'Material Symbols Outlined', 'Material Icons' !important;
+            font-family: 'Inter', sans-serif;
         }
         
         /* Force background color on all main app viewports */
         html, body, .stApp, [data-testid="stAppViewContainer"], [data-testid="stHeader"], [data-testid="stAppViewBlockContainer"], .main {
-            background-color: #D7DFE2 !important;
+            background-color: #f3f4f6 !important;
         }
         
-        /* Force global text color to Deep Slate */
+        /* Force global text color to dark gray */
         p, span, h1, h2, h3, h4, h5, h6, label, li, small {
-            color: #282B3A !important;
+            color: #1f2937 !important;
         }
         
-        /* Exclude header container text from global deep slate override */
+        /* Exclude header container text from global text overrides */
         .header-container, .header-container *, .header-container p, .header-container div, .header-container h1, .header-container h2 {
             color: #ffffff !important;
         }
         .header-title, .header-title * {
-            color: #FFBF25 !important;
+            color: #ffffff !important;
         }
         
         /* Completely hide the sidebar pane and its toggle buttons */
@@ -82,18 +70,18 @@ def setup_page():
             padding-bottom: 5rem !important;
         }
         
-        /* Custom Header Styling in Deep Slate with Warm Gold text */
+        /* Custom Header Styling in Dark Slate with Blue Accent */
         .header-container {
             text-align: center;
             padding: 30px 20px;
-            background: linear-gradient(135deg, #282B3A 0%, #1c1e28 100%);
+            background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
             border-radius: 16px;
             margin-bottom: 35px;
-            box-shadow: 0 10px 20px -3px rgba(40, 43, 58, 0.25);
+            box-shadow: 0 10px 25px -5px rgba(15, 23, 42, 0.2);
             color: #ffffff;
             position: relative;
             overflow: hidden;
-            border-bottom: 4px solid #FFBF25; /* Gold Accent line */
+            border-bottom: 4px solid #2563eb; /* Blue Accent line */
         }
         .header-container::before {
             content: "";
@@ -114,169 +102,259 @@ def setup_page():
             align-items: center;
             justify-content: center;
             gap: 12px;
-            color: #FFBF25 !important; /* Warm Gold Header */
+            color: #ffffff !important;
         }
         .header-subtitle {
             font-size: 1.1rem;
             font-weight: 400;
-            color: #D7DFE2;
+            color: #94a3b8;
             max-width: 600px;
             margin: 5px auto 0 auto;
             line-height: 1.4;
         }
         
-        /* Styling Streamlit inputs: File Uploader */
         /* Hide native Streamlit file uploader and internal controls completely */
         div[data-testid="stFileUploader"],
         .hidden-native-controls {
             display: none !important;
         }
         
-        /* Premium Document Database Card styling */
+        /* Clean Document Database Card styling */
         .db-section-card {
             background: #ffffff;
-            padding: 24px;
-            border-radius: 16px;
-            border-left: 6px solid #FFBF25; /* Gold Accent line */
-            box-shadow: 0 10px 25px -5px rgba(40, 43, 58, 0.05), 0 8px 10px -6px rgba(40, 43, 58, 0.03);
+            padding: 2rem;
+            border-radius: 1rem;
+            border: 1px solid #e5e7eb;
+            box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
             margin-bottom: 25px;
             display: flex;
             flex-direction: column;
-            gap: 20px;
+            gap: 1.5rem;
         }
         
-        .db-controls-row {
+        /* Dropzone area styling */
+        .upload-dropzone {
+            border: 2px dashed #d1d5db;
+            border-radius: 0.75rem;
+            padding: 2rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        
+        .upload-dropzone:hover {
+            border-color: #60a5fa;
+            background-color: #f9fafb;
+        }
+        
+        .upload-dropzone.dragover {
+            border-color: #3b82f6;
+            background-color: #eff6ff;
+            transform: scale(1.01);
+            box-shadow: inset 0 2px 4px 0 rgba(0, 0, 0, 0.06);
+        }
+        
+        .dropzone-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            transition: transform 0.2s ease;
+        }
+        
+        .upload-dropzone:hover .dropzone-icon {
+            transform: scale(1.1);
+        }
+        
+        .dropzone-title {
+            font-size: 1.125rem;
+            font-weight: 600;
+            color: #1f2937;
+            margin-bottom: 4px;
+        }
+        
+        .dropzone-subtitle {
+            font-size: 0.875rem;
+            color: #6b7280;
+            margin-bottom: 1rem;
+        }
+        
+        .dropzone-info {
+            font-size: 0.75rem;
+            color: #9ca3af;
+        }
+        
+        /* Actions button row */
+        .actions-row {
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            gap: 1rem;
+            border-top: 1px solid #f3f4f6;
+            padding-top: 1.5rem;
+        }
+        
+        .btn-primary {
+            background-color: #2563eb;
+            color: #ffffff !important;
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.75rem;
+            font-weight: 500;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+            box-shadow: 0 4px 6px -1px rgba(37, 99, 235, 0.1), 0 2px 4px -1px rgba(37, 99, 235, 0.06);
+            border: none;
+        }
+        
+        .btn-primary:hover {
+            background-color: #1d4ed8;
+            transform: scale(1.02);
+            box-shadow: 0 10px 15px -3px rgba(37, 99, 235, 0.2), 0 4px 6px -2px rgba(37, 99, 235, 0.1);
+        }
+        
+        .btn-danger-outline {
+            background-color: transparent;
+            color: #ef4444 !important;
+            border: 1.5px solid #ef4444;
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.75rem;
+            font-weight: 500;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+        }
+        
+        .btn-danger-outline:hover {
+            background-color: #ef4444;
+            color: #ffffff !important;
+            box-shadow: 0 4px 6px -1px rgba(239, 68, 68, 0.1);
+        }
+        
+        .btn-danger-outline:disabled,
+        .btn-primary.disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            pointer-events: none;
+        }
+        
+        /* File Card Rows */
+        .file-list-container {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+            max-height: 300px;
+            overflow-y: auto;
+            padding-right: 4px;
+        }
+        
+        .file-list-header {
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: #9ca3af;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+        
+        .file-list-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+        
+        .file-card-row {
             display: flex;
             align-items: center;
             justify-content: space-between;
-            flex-wrap: wrap;
-            gap: 16px;
+            background-color: #f9fafb;
+            border: 1px solid #f3f4f6;
+            border-radius: 0.75rem;
+            padding: 1rem;
+            transition: all 0.2s ease;
         }
         
-        .db-upload-control {
+        .file-card-row:hover {
+            box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.05);
+        }
+        
+        .file-card-left {
             display: flex;
             align-items: center;
-            gap: 16px;
-            flex-wrap: wrap;
+            gap: 0.75rem;
+            overflow: hidden;
         }
         
-        .custom-upload-btn {
-            background: #282B3A;
-            color: #ffffff !important;
-            padding: 12px 24px;
-            border-radius: 10px;
-            cursor: pointer;
-            font-size: 15px;
+        .file-card-icon {
+            font-size: 1.5rem;
+            color: #3b82f6;
+        }
+        
+        .file-card-details {
+            display: flex;
+            flex-direction: column;
+            min-w-0;
+        }
+        
+        .file-card-name {
+            font-size: 0.875rem;
             font-weight: 600;
-            border: none;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-            transition: all 0.2s ease-in-out;
-            box-shadow: 0 4px 6px rgba(40, 43, 58, 0.15);
+            color: #1f2937;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
         
-        .custom-upload-btn:hover {
-            background: #FB493D; /* Coral Red hover */
-            transform: translateY(-1px);
-            box-shadow: 0 6px 12px rgba(251, 73, 61, 0.2);
+        .file-card-size {
+            font-size: 0.75rem;
+            color: #6b7280;
         }
         
-        .upload-info-text {
-            color: #718096;
-            font-size: 14px;
-        }
-        
-        #pdf-upload {
-            display: none !important;
-        }
-        
-        .custom-clear-btn {
+        .file-card-remove-btn {
             background: transparent;
-            color: #FB493D !important;
-            border: 1.5px solid #FB493D;
-            padding: 10px 20px;
-            border-radius: 10px;
+            border: none;
+            color: #9ca3af;
             cursor: pointer;
-            font-size: 14px;
-            font-weight: 600;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            gap: 6px;
-            transition: all 0.2s ease-in-out;
+            font-size: 1.125rem;
+            padding: 4px;
+            border-radius: 0.375rem;
+            transition: all 0.2s ease;
         }
         
-        .custom-clear-btn:hover {
-            background: #FB493D;
-            color: #ffffff !important;
-            box-shadow: 0 4px 10px rgba(251, 73, 61, 0.15);
+        .file-card-remove-btn:hover {
+            color: #ef4444;
+            background-color: #fee2e2;
         }
         
-        /* Active file tags styling */
-        .active-files-container {
-            border-top: 1px solid #edf2f7;
-            padding-top: 18px;
-        }
-        
-        .active-files-title {
-            font-weight: 700;
-            font-size: 13px;
-            color: #718096;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            margin-bottom: 10px;
-        }
-        
-        .files-tags-grid {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 8px;
-            margin-bottom: 8px;
-        }
-        
-        .file-tag {
-            background: #f7fafc;
-            border: 1px solid #e2e8f0;
-            color: #282B3A;
-            padding: 6px 12px;
-            border-radius: 8px;
-            font-size: 14px;
-            font-weight: 500;
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-        }
-        
-        .file-tag-icon {
-            font-size: 15px;
-        }
-        
-        .files-stats {
-            font-size: 13px;
-            color: #718096;
+        .file-list-stats {
+            font-size: 0.8125rem;
+            color: #6b7280;
             margin-top: 4px;
         }
         
         /* Styling Streamlit inputs: Text Input Field */
         div[data-baseweb="input"] {
             border-radius: 10px !important;
-            border: 1.5px solid #282B3A !important;
+            border: 1.5px solid #d1d5db !important;
             background-color: #ffffff !important;
             transition: all 0.2s ease-in-out !important;
             padding: 2px 5px !important;
             box-shadow: 0 2px 4px rgba(0,0,0,0.02) !important;
         }
         div[data-baseweb="input"]:focus-within {
-            border-color: #FB493D !important; /* Coral Red focus border */
-            box-shadow: 0 0 0 3px rgba(251, 73, 61, 0.18) !important;
+            border-color: #2563eb !important; /* Blue focus border */
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.18) !important;
         }
         
         /* Custom section titles */
         .section-title {
-            font-weight: 800;
-            color: #282B3A;
+            font-weight: 750;
+            color: #111827;
             font-size: 1.3rem;
             margin-bottom: 12px;
             display: flex;
@@ -284,50 +362,49 @@ def setup_page():
             gap: 8px;
         }
         
-        /* Grounded Answer Card styling with Warm Gold border */
+        /* Grounded Answer Card styling */
         .answer-box {
             background-color: #ffffff;
-            border: 1px solid #e2e8f0;
-            border-left: 6px solid #FFBF25; /* Warm Gold left border */
+            border: 1px solid #e5e7eb;
+            border-left: 6px solid #2563eb; /* Blue left border */
             padding: 22px;
             border-radius: 10px;
-            color: #282B3A;
+            color: #1f2937;
             line-height: 1.65;
             margin-top: 15px;
             margin-bottom: 30px;
-            box-shadow: 0 10px 20px -3px rgba(40, 43, 58, 0.05), 0 4px 6px -2px rgba(40, 43, 58, 0.03);
+            box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.05);
             font-size: 1.05rem;
         }
         .answer-title-text {
-            font-weight: 800;
+            font-weight: 750;
             font-size: 1.2rem;
-            color: #282B3A;
+            color: #111827;
             margin-bottom: 10px;
             display: flex;
             align-items: center;
             gap: 8px;
         }
         
-        /* Citation / Source Cards styling with Coral Red border and lift micro-animation */
+        /* Citation / Source Cards styling */
         .source-card {
             background-color: #ffffff;
-            border: 1px solid #edf2f7;
-            border-left: 6px solid #FB493D; /* Coral Red left border */
+            border: 1px solid #e5e7eb;
+            border-left: 6px solid #ef4444; /* Danger color left border */
             padding: 18px;
             border-radius: 8px;
             margin-top: 15px;
             margin-bottom: 15px;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.03), 0 2px 4px -1px rgba(0, 0, 0, 0.02);
-            transition: all 0.3s cubic-bezier(0.165, 0.84, 0.44, 1);
+            box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+            transition: all 0.2s ease;
         }
         .source-card:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 12px 20px -5px rgba(0, 0, 0, 0.08), 0 4px 6px -2px rgba(0, 0, 0, 0.04);
-            border-left-color: #e53e3e; /* Darker red on hover */
+            transform: translateY(-2px);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.08);
         }
         .source-header {
-            font-weight: 700;
-            color: #FB493D; /* Coral Red source titles */
+            font-weight: 600;
+            color: #ef4444; /* Danger color source titles */
             font-size: 0.95rem;
             margin-bottom: 8px;
             display: flex;
@@ -336,7 +413,7 @@ def setup_page():
         }
         .source-content {
             font-size: 0.92rem;
-            color: #282B3A;
+            color: #1f2937;
             line-height: 1.55;
             font-style: normal;
         }
@@ -344,12 +421,6 @@ def setup_page():
         /* Global override for status blocks */
         div[data-testid="stNotification"] {
             border-radius: 8px !important;
-        }
-        
-        /* Sidebar styling overrides */
-        [data-testid="stSidebar"] {
-            background-color: #ffffff !important;
-            border-right: 1.5px solid #282B3A !important;
         }
         </style>
         <script>
