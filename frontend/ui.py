@@ -3,7 +3,7 @@ import streamlit as st
 def setup_page():
     """
     Sets up the Streamlit page configurations and injects custom CSS 
-    for a clean, professional medical assistant theme.
+    for a clean, professional medical assistant theme using the user's color palette.
     """
     st.set_page_config(
         page_title="Medical RAG Assistant",
@@ -12,17 +12,22 @@ def setup_page():
         initial_sidebar_state="collapsed"
     )
     
-    # Custom CSS for modern, minimal, and premium medical-themed design
+    # Custom CSS applying the requested color palette:
+    # - Coral Red: #FB493D
+    # - Deep Slate: #282B3A
+    # - Soft Ice Blue: #D7DFE2
+    # - Warm Gold: #FFBF25
     st.markdown(
         """
         <style>
         /* Import premium sans-serif typography */
         @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap');
         
-        /* Apply fonts across the application */
+        /* Apply fonts and global Soft Ice Blue background */
         html, body, [class*="css"], .main, .stApp {
             font-family: 'Plus Jakarta Sans', sans-serif !important;
-            background-color: #f7fafc;
+            background-color: #D7DFE2 !important;
+            color: #282B3A !important;
         }
         
         /* Container page structure */
@@ -31,17 +36,18 @@ def setup_page():
             padding-bottom: 5rem !important;
         }
         
-        /* Custom Header Styling */
+        /* Custom Header Styling in Deep Slate with Warm Gold text */
         .header-container {
             text-align: center;
             padding: 30px 20px;
-            background: linear-gradient(135deg, #1a365d 0%, #2a4365 100%);
+            background: linear-gradient(135deg, #282B3A 0%, #1c1e28 100%);
             border-radius: 16px;
             margin-bottom: 35px;
-            box-shadow: 0 10px 15px -3px rgba(26, 54, 93, 0.15), 0 4px 6px -2px rgba(26, 54, 93, 0.05);
+            box-shadow: 0 10px 20px -3px rgba(40, 43, 58, 0.25);
             color: #ffffff;
             position: relative;
             overflow: hidden;
+            border-bottom: 4px solid #FFBF25; /* Gold Accent line */
         }
         .header-container::before {
             content: "";
@@ -62,11 +68,12 @@ def setup_page():
             align-items: center;
             justify-content: center;
             gap: 12px;
+            color: #FFBF25 !important; /* Warm Gold Header */
         }
         .header-subtitle {
             font-size: 1.1rem;
             font-weight: 400;
-            color: #e2e8f0;
+            color: #D7DFE2;
             max-width: 600px;
             margin: 5px auto 0 auto;
             line-height: 1.4;
@@ -74,7 +81,7 @@ def setup_page():
         
         /* Styling Streamlit inputs: File Uploader */
         div[data-testid="stFileUploader"] {
-            border: 2px dashed #cbd5e0 !important;
+            border: 2px dashed #282B3A !important;
             border-radius: 12px !important;
             padding: 15px 25px !important;
             background-color: #ffffff !important;
@@ -82,65 +89,65 @@ def setup_page():
             box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05) !important;
         }
         div[data-testid="stFileUploader"]:hover {
-            border-color: #3182ce !important;
-            background-color: #ebf8ff !important;
-            box-shadow: 0 10px 15px -3px rgba(49, 130, 206, 0.1) !important;
+            border-color: #FB493D !important; /* Coral Red focus border */
+            background-color: #fff9f8 !important; /* Soft warm pink-white background */
+            box-shadow: 0 10px 15px -3px rgba(251, 73, 61, 0.1) !important;
         }
         
         /* Styling Streamlit inputs: Text Input Field */
         div[data-baseweb="input"] {
             border-radius: 10px !important;
-            border: 1.5px solid #e2e8f0 !important;
+            border: 1.5px solid #282B3A !important;
             background-color: #ffffff !important;
             transition: all 0.2s ease-in-out !important;
             padding: 2px 5px !important;
             box-shadow: 0 2px 4px rgba(0,0,0,0.02) !important;
         }
         div[data-baseweb="input"]:focus-within {
-            border-color: #3182ce !important;
-            box-shadow: 0 0 0 3px rgba(49, 130, 206, 0.18) !important;
+            border-color: #FB493D !important; /* Coral Red focus border */
+            box-shadow: 0 0 0 3px rgba(251, 73, 61, 0.18) !important;
         }
         
         /* Custom section titles */
         .section-title {
-            font-weight: 700;
-            color: #2d3748;
-            font-size: 1.25rem;
+            font-weight: 800;
+            color: #282B3A;
+            font-size: 1.3rem;
             margin-bottom: 12px;
             display: flex;
             align-items: center;
             gap: 8px;
         }
         
-        /* Grounded Answer Card styling */
+        /* Grounded Answer Card styling with Warm Gold border */
         .answer-box {
             background-color: #ffffff;
             border: 1px solid #e2e8f0;
-            border-left: 5px solid #3182ce;
+            border-left: 6px solid #FFBF25; /* Warm Gold left border */
             padding: 22px;
             border-radius: 10px;
-            color: #2d3748;
+            color: #282B3A;
             line-height: 1.65;
             margin-top: 15px;
             margin-bottom: 30px;
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.02), 0 4px 6px -2px rgba(0, 0, 0, 0.02);
+            box-shadow: 0 10px 20px -3px rgba(40, 43, 58, 0.05), 0 4px 6px -2px rgba(40, 43, 58, 0.03);
             font-size: 1.05rem;
         }
         .answer-title-text {
-            font-weight: 700;
-            font-size: 1.15rem;
-            color: #2b6cb0;
+            font-weight: 800;
+            font-size: 1.2rem;
+            color: #282B3A;
             margin-bottom: 10px;
             display: flex;
             align-items: center;
             gap: 8px;
         }
         
-        /* Citation / Source Cards styling with lift micro-animation */
+        /* Citation / Source Cards styling with Coral Red border and lift micro-animation */
         .source-card {
             background-color: #ffffff;
             border: 1px solid #edf2f7;
-            border-left: 4px solid #319795; /* Medical teal accent */
+            border-left: 6px solid #FB493D; /* Coral Red left border */
             padding: 18px;
             border-radius: 8px;
             margin-top: 15px;
@@ -151,11 +158,11 @@ def setup_page():
         .source-card:hover {
             transform: translateY(-3px);
             box-shadow: 0 12px 20px -5px rgba(0, 0, 0, 0.08), 0 4px 6px -2px rgba(0, 0, 0, 0.04);
-            border-left-color: #2c7a7b;
+            border-left-color: #e53e3e; /* Darker red on hover */
         }
         .source-header {
             font-weight: 700;
-            color: #2c7a7b;
+            color: #FB493D; /* Coral Red source titles */
             font-size: 0.95rem;
             margin-bottom: 8px;
             display: flex;
@@ -164,7 +171,7 @@ def setup_page():
         }
         .source-content {
             font-size: 0.92rem;
-            color: #4a5568;
+            color: #282B3A;
             line-height: 1.55;
             font-style: normal;
         }
@@ -172,6 +179,12 @@ def setup_page():
         /* Global override for status blocks */
         div[data-testid="stNotification"] {
             border-radius: 8px !important;
+        }
+        
+        /* Sidebar styling overrides */
+        [data-testid="stSidebar"] {
+            background-color: #ffffff !important;
+            border-right: 1.5px solid #282B3A !important;
         }
         </style>
         """,

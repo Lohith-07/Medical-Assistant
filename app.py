@@ -246,7 +246,17 @@ if st.session_state.retriever is not None:
                 
                 # Display source references (Phase 9)
                 st.markdown('<div class="section-title" style="margin-top: 15px; font-size: 1.1rem; color: #4a5568;">📚 Retrieved Source Chunks:</div>', unsafe_allow_html=True)
+                
+                # De-duplicate identical text content to keep the UI clean and professional
+                seen_content = set()
+                unique_docs = []
                 for doc in result["source_documents"]:
+                    cleaned_content = doc.page_content.strip()
+                    if cleaned_content not in seen_content:
+                        seen_content.add(cleaned_content)
+                        unique_docs.append(doc)
+                
+                for doc in unique_docs:
                     source_name = doc.metadata.get("source", "Unknown PDF")
                     page_num = doc.metadata.get("page", 0) + 1  # 0-indexed page to 1-indexed for display
                     content = doc.page_content
