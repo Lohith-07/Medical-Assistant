@@ -23,9 +23,23 @@ def setup_page():
         /* Import premium sans-serif typography */
         @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap');
         
+        /* Injected Streamlit theme overrides to force the custom color palette */
+        :root {
+            --background-color: #D7DFE2 !important;
+            --secondary-background-color: #ffffff !important;
+            --text-color: #282B3A !important;
+            --primary-color: #FB493D !important;
+        }
+        
         /* Apply fonts and global Soft Ice Blue background */
         html, body, [class*="css"], .main, .stApp {
             font-family: 'Plus Jakarta Sans', sans-serif !important;
+            background-color: #D7DFE2 !important;
+            color: #282B3A !important;
+        }
+        
+        /* Force background color on main container viewports */
+        [data-testid="stAppViewContainer"], .stApp, [data-testid="stHeader"] {
             background-color: #D7DFE2 !important;
             color: #282B3A !important;
         }

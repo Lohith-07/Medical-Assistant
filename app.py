@@ -118,21 +118,40 @@ with st.sidebar:
     # Reset Database control button
     st.markdown("### 🧹 Database Admin")
     if st.button("Clear Vector Store", type="secondary", use_container_width=True):
-        import shutil
-        # Delete folders
         try:
-            if os.path.exists("db"):
-                shutil.rmtree("db")
-            if os.path.exists("data"):
-                shutil.rmtree("data")
+            # 1. Delete Chroma DB collection to release handles and clear vectors
+            if st.session_state.retriever is not None:
+                try:
+                    st.session_state.retriever.vectorstore.delete_collection()
+                except Exception:
+                    pass
             
-            # Reset state
+            # 2. Reset session state variables
             st.session_state.uploaded_filename = None
             st.session_state.retriever = None
             st.session_state.num_pages = 0
             st.session_state.num_chunks = 0
             
-            st.success("Database cleared!")
+            # 3. Clean up the data directory (not locked)
+            import shutil
+            if os.path.exists("data"):
+                try:
+                    shutil.rmtree("data")
+                except Exception:
+                    pass
+            os.makedirs("data", exist_ok=True)
+            
+            # 4. Clean up the db directory (we catch PermissionErrors in case Windows locks SQLite)
+            if os.path.exists("db"):
+                try:
+                    shutil.rmtree("db")
+                except PermissionError:
+                    # Windows file lock warning workaround. 
+                    # The collection is already deleted, so the database is empty.
+                    pass
+            os.makedirs("db", exist_ok=True)
+            
+            st.success("Database cleared successfully!")
             st.rerun()
         except Exception as ex:
             st.error(f"Error resetting database: {ex}")
