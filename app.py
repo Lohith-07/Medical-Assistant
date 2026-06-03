@@ -14,6 +14,43 @@ setup_page()
 # 2. Render Page Header
 render_header()
 
+# Sidebar - Developer & Technical Dashboard
+with st.sidebar:
+    st.markdown(
+        """
+        <div style="text-align: center; padding: 15px 0;">
+            <span style="font-size: 3.5rem;">🩺</span>
+            <h2 style="margin-top: 10px; color: #1a365d; font-weight: 800; font-size: 1.5rem;">RAG Dashboard</h2>
+            <p style="color: #718096; font-size: 0.85rem;">System Parameters & Configuration</p>
+        </div>
+        <hr style="margin-top: 5px; margin-bottom: 20px; border-color: #e2e8f0;"/>
+        """,
+        unsafe_allow_html=True
+    )
+    
+    st.markdown("### ⚙️ System Stack")
+    st.info(
+        "**LLM**: `gemini-2.5-flash` (Generative)\n\n"
+        "**Embeddings**: `all-MiniLM-L6-v2` (Local, 384-D)\n\n"
+        "**Vector DB**: `ChromaDB` (Persistent, Local)"
+    )
+    
+    st.markdown("### 📊 Hyperparameters")
+    st.success(
+        "**Chunk Size**: 700 characters\n\n"
+        "**Chunk Overlap**: 100 characters\n\n"
+        "**Retrieval Count (k)**: 3 context chunks"
+    )
+    
+    st.markdown("### 🧠 Interview Insight")
+    st.warning(
+        "**Why RAG?**\n\n"
+        "Retrieval-Augmented Generation solves knowledge-cutoff and prevents hallucinations "
+        "by feeding precise context chunks directly into the LLM prompt window, generating "
+        "fully grounded medical responses with citations."
+    )
+
+
 # 3. Initialize Streamlit session state variables
 if "uploaded_filename" not in st.session_state:
     st.session_state.uploaded_filename = None
