@@ -162,6 +162,7 @@ def setup_page():
         }
         
         /* Hide the icon inside the file uploader button to prevent duplicate text */
+        div[data-testid="stFileUploader"] button span:first-child:not(:only-child),
         div[data-testid="stFileUploader"] button svg,
         div[data-testid="stFileUploader"] button [data-testid="stIconMaterial"],
         div[data-testid="stFileUploader"] button [class*="Icon"],
