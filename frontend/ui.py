@@ -32,12 +32,23 @@ def setup_page():
         }
         
         /* Force typography globally on standard text containers, avoiding icon font overrides */
-        html, body, .main, .stApp, p, h1, h2, h3, h4, h5, h6, label, li, small, input, button, textarea {
+        html, body, .main, .stApp, p, h1, h2, h3, h4, h5, h6, label, li, small, input, textarea {
             font-family: 'Plus Jakarta Sans', sans-serif !important;
         }
         
+        /* Force typography on buttons without !important to prevent inheritance overrides on icons */
+        button {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+        }
+        
         /* Restore font family for Streamlit's Material Icons/Symbols to prevent text rendering */
-        [data-testid="stIconMaterial"] {
+        [data-testid="stIconMaterial"], 
+        [class*="Icon"], 
+        [class*="icon"], 
+        .material-icons, 
+        i, 
+        span[class*="icon"], 
+        span[class*="Icon"] {
             font-family: 'Material Symbols Rounded', 'Material Symbols Outlined', 'Material Icons' !important;
         }
         
@@ -131,6 +142,7 @@ def setup_page():
         
         /* Style the file uploader button to match our palette and look premium */
         div[data-testid="stFileUploader"] button {
+            font-family: 'Plus Jakarta Sans', sans-serif;
             background-color: #282B3A !important;
             color: #ffffff !important;
             border: 1px solid #282B3A !important;
