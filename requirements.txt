@@ -1,8 +1,22 @@
-streamlit>=1.30.0
-langchain>=0.1.0
-langchain-community>=0.0.10
-langchain-google-genai>=0.0.5
-chromadb>=0.4.22
-sentence-transformers>=2.3.0
+# Medical RAG Assistant — Notebook dependencies
+
+# LangChain ecosystem
+langchain>=0.2.0
+langchain-community>=0.2.0
+langchain-google-genai>=1.0.0
+
+# Vector database (local, no server needed)
+chromadb>=0.5.0
+
+# Local embedding model (runs on CPU, no GPU required)
+sentence-transformers>=3.0.0
+
+# PDF parsing
 pypdf>=4.0.0
+
+# Environment variable management
 python-dotenv>=1.0.0
+
+# Jupyter notebook runner
+jupyter>=1.0.0
+ipykernel>=6.0.0

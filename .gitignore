@@ -1,7 +1,24 @@
+# Virtual environment (not needed — use: pip install -r requirements.txt)
 venv/
+
+# Python cache
 __pycache__/
 *.pyc
+*.pyo
+
+# Environment variables (NEVER commit API keys)
 .env
+
+# Editor config
 .idea/
 .vscode/
-*.db
+
+# ChromaDB vector store (auto-generated when notebook runs)
+chroma_db/
+db/
+
+# Uploaded PDF files (user-specific)
+data/
+
+# Jupyter checkpoints (auto-generated)
+.ipynb_checkpoints/
