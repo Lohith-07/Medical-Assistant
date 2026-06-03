@@ -109,27 +109,3 @@ streamlit run app.py
 This will open the application in your default web browser (usually at `http://localhost:8501`).
 
 ---
-
-## 💬 Interview Q&A (10+ LPA Target)
-
-#### Q1: Why did you choose `RecursiveCharacterTextSplitter` over `CharacterTextSplitter`?
-> **Answer**: `CharacterTextSplitter` splits strictly on a single separator (like `\n`). If a paragraph doesn't have that exact separator, it can produce huge chunks that exceed our target size. `RecursiveCharacterTextSplitter` uses a list of separators recursively (starting with paragraph breaks `\n\n`, then newlines `\n`, then spaces ` `, and finally individual characters). This ensures that sentences and paragraphs are kept together as much as possible, preserving semantic integrity.
-
-#### Q2: How does the application prevent hallucinations, especially in a critical field like medicine?
-> **Answer**: We enforce two lines of defense:
-> 1. **Prompt Engineering**: The system prompt explicitly instructs the LLM: *"Answer the question using ONLY the provided clinical context. If the context does not contain enough information, clearly state 'I cannot answer this based on the provided document.' Never make up facts."*
-> 2. **Low Temperature**: We configure the Gemini LLM with a low temperature (`temperature=0.1`). This minimizes creativity and forces the model to be highly deterministic and literal in its generation.
-
-#### Q3: Why did you choose a local embedding model like `all-MiniLM-L6-v2` instead of OpenAI's or Google's embedding APIs?
-> **Answer**: Choosing a local embedding model offers three main advantages:
-> 1. **Zero Cost**: Embedding APIs charge per token. A local model runs completely free on the client's host CPU.
-> 2. **Privacy**: Medical documents contain sensitive information. Local embedding ensures the raw text is not sent to external APIs during vectorization.
-> 3. **Offline Performance**: It removes network latency when indexing documents.
-
-#### Q4: How does ChromaDB persist data, and how does your app avoid re-indexing the PDF on every user click?
-> **Answer**: 
-> 1. **Persistence**: ChromaDB is initialized with a `persist_directory="db"`. When `from_documents` is called, it writes the vector index files and metadata mappings directly to disk in sqlite/parquet format.
-> 2. **Session State Cache**: Streamlit runs the script from top to bottom on every user interaction. To avoid re-processing the PDF or reloading the database, we cache the database retriever in `st.session_state.retriever`. We only re-run the ingestion pipeline if a brand new file is uploaded (`st.session_state.uploaded_filename != uploaded_file.name`).
-
-#### Q5: If your medical guidelines PDF is updated, how does your RAG system handle it?
-> **Answer**: Since our RAG pipeline retrieves information dynamically at query time from the vector database, we simply clear the `db/` database directory and run the ingestion pipeline on the updated PDF. The new chunks and embeddings will overwrite the database, and the assistant will immediately start using the new guidelines without needing any code changes or model retraining.
