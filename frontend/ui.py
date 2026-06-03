@@ -126,50 +126,47 @@ def setup_page():
         }
         
         /* Styling Streamlit inputs: File Uploader */
+        /* Hide native Streamlit file uploader container completely */
         div[data-testid="stFileUploader"] {
-            border: 2px dashed #282B3A !important;
-            border-radius: 12px !important;
-            padding: 15px 25px !important;
-            background-color: #ffffff !important;
-            transition: all 0.3s ease !important;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05) !important;
-        }
-        div[data-testid="stFileUploader"]:hover {
-            border-color: #FB493D !important; /* Coral Red focus border */
-            background-color: #fff9f8 !important; /* Soft warm pink-white background */
-            box-shadow: 0 10px 15px -3px rgba(251, 73, 61, 0.1) !important;
-        }
-        
-        /* Style the file uploader button to match our palette and look premium */
-        div[data-testid="stFileUploader"] button {
-            font-family: 'Plus Jakarta Sans', sans-serif;
-            background-color: #282B3A !important;
-            color: #ffffff !important;
-            border: 1px solid #282B3A !important;
-            border-radius: 8px !important;
-            padding: 8px 16px !important;
-            font-weight: 600 !important;
-            font-size: 0.9rem !important;
-            transition: all 0.2s ease-in-out !important;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1) !important;
-        }
-        div[data-testid="stFileUploader"] button:hover {
-            background-color: #FB493D !important;
-            border-color: #FB493D !important;
-            color: #ffffff !important;
-            transform: scale(1.02) !important;
-            box-shadow: 0 4px 8px rgba(251, 73, 61, 0.2) !important;
-        }
-        
-        /* Hide the icon inside the file uploader button to prevent duplicate text */
-        div[data-testid="stFileUploader"] button span:first-child:not(:only-child),
-        div[data-testid="stFileUploader"] button svg,
-        div[data-testid="stFileUploader"] button [data-testid="stIconMaterial"],
-        div[data-testid="stFileUploader"] button [class*="Icon"],
-        div[data-testid="stFileUploader"] button [class*="icon"],
-        div[data-testid="stFileUploader"] button .material-icons,
-        div[data-testid="stFileUploader"] button i {
             display: none !important;
+        }
+        
+        /* Custom Upload Button Styling */
+        .upload-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            margin-top: 10px;
+            margin-bottom: 10px;
+        }
+        
+        .upload-btn {
+            background: #d9dee3;
+            color: #282B3A !important;
+            padding: 12px 24px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 500;
+            border: 1px solid #b8c0c7;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            transition: background 0.2s ease;
+        }
+        
+        .upload-btn:hover {
+            background: #cfd6dc;
+            color: #282B3A !important;
+        }
+        
+        #pdf-upload {
+            display: none;
+        }
+        
+        .upload-info {
+            color: #555 !important;
+            font-size: 15px;
         }
         
         /* Styling Streamlit inputs: Text Input Field */
@@ -265,6 +262,26 @@ def setup_page():
             border-right: 1.5px solid #282B3A !important;
         }
         </style>
+        <script>
+        // Global listener to bridge custom HTML upload button to hidden native Streamlit uploader
+        if (typeof window.customUploaderListenerSetup === 'undefined') {
+            window.customUploaderListenerSetup = true;
+            document.addEventListener('change', (e) => {
+                if (e.target && e.target.id === 'pdf-upload') {
+                    const customInput = e.target;
+                    const nativeInput = document.querySelector('[data-testid="stFileUploader"] input[type="file"]');
+                    if (nativeInput) {
+                        const dataTransfer = new DataTransfer();
+                        for (let i = 0; i < customInput.files.length; i++) {
+                            dataTransfer.items.add(customInput.files[i]);
+                        }
+                        nativeInput.files = dataTransfer.files;
+                        nativeInput.dispatchEvent(new Event('change', { bubbles: true }));
+                    }
+                }
+            });
+        }
+        </script>
         """,
         unsafe_allow_html=True
     )

@@ -69,6 +69,25 @@ with col1:
         label_visibility="collapsed",
         key=st.session_state.uploader_key
     )
+    st.markdown(
+        """
+        <div class="upload-wrapper">
+          <label for="pdf-upload" class="upload-btn">
+            Upload PDF
+          </label>
+          <input
+            id="pdf-upload"
+            type="file"
+            accept=".pdf"
+            multiple
+          />
+          <span class="upload-info">
+            200MB per file • PDF
+          </span>
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
 with col2:
     # Vertical spacer to align button with file uploader height
     st.markdown('<div style="margin-top: 28px;"></div>', unsafe_allow_html=True)
