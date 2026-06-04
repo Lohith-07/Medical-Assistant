@@ -1,11 +1,26 @@
 # Medical RAG Assistant — Dependencies
-# Install in Google Colab with:
+# ─────────────────────────────────────────────────────────────────────────────
+# Install in Google Colab:
 #   !pip install -q -r requirements.txt
+#
+# Install locally (Python 3.9+):
+#   pip install -r requirements.txt
+# ─────────────────────────────────────────────────────────────────────────────
 
-langchain>=0.3.25
-langchain-community>=0.3.24
-langchain-google-genai>=2.1.4
-chromadb>=1.0.0
-sentence-transformers>=3.3.0
-pypdf>=4.3.0
-google-generativeai>=0.8.0
+# Core LangChain framework
+langchain>=0.3.0
+langchain-community>=0.3.0
+langchain-text-splitters>=0.3.0
+
+# LLM integration — Groq (free, fast)
+langchain-groq>=0.2.0
+
+# Embeddings — updated non-deprecated package
+langchain-huggingface>=0.1.0
+sentence-transformers>=3.0.0
+
+# Vector database — local, no server required
+chromadb>=0.5.0
+
+# PDF loading
+pypdf>=4.0.0

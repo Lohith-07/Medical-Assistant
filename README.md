@@ -1,60 +1,104 @@
 # 🩺 Medical RAG Assistant
 
-A **Retrieval-Augmented Generation (RAG)** system for medical documents — built with LangChain, ChromaDB, and Google Gemini.
+> **Retrieval-Augmented Generation system for medical document question-answering.**  
+> Upload a medical PDF → ask natural language questions → get grounded answers with page citations.
 
-> Upload any medical PDF → ask natural language questions → get grounded answers with page citations.
-
----
-
-## 🚀 Quick Start (Google Colab)
-
-[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/Lohith-07/Medical-Assistant/blob/main/Medical_RAG_Assistant.ipynb)
-
-1. Click **Open in Colab** above
-2. Run **Cell 1** to install dependencies
-3. Run **Cell 3** to upload your PDF
-4. Enter your **Gemini API key** when prompted → [Get a free key](https://aistudio.google.com/app/apikey)
-5. Run all remaining cells and start asking questions!
+[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/YOUR_USERNAME/medical-rag-assistant/blob/main/notebooks/Medical_RAG_Assistant.ipynb)
 
 ---
 
-## 🧠 How It Works
+## 📖 What This Project Does
+
+Standard LLMs hallucinate medical facts — they generate confident-sounding answers from training memory, with no grounding in your actual documents.
+
+**RAG fixes this** by:
+1. Converting your PDF into searchable vector embeddings (once, offline)
+2. At query time, retrieving only the most relevant document chunks
+3. Sending those chunks as context to the LLM — the LLM cannot "go outside" the evidence
+4. Returning a grounded answer with page-level citations
+
+The result: answers that are **traceable, verifiable, and hallucination-resistant**.
+
+---
+
+## 🏗️ Architecture
 
 ```
-PDF → Load pages → Split into chunks → Embed (all-MiniLM-L6-v2)
-                                              ↓
-                                        ChromaDB (vector store)
-
-User Question → Embed query → Similarity search → Top 3 chunks
-                                                        ↓
-                                          Gemini 2.5 Flash + Prompt
-                                                        ↓
-                                     Grounded Answer + Page Citations
+📄 Medical PDF
+     │
+     ▼
+[PyPDF Loader]  ──────────────────────  Page-by-page extraction + metadata
+     │
+     ▼
+[RecursiveCharacterTextSplitter]  ────  800-char chunks, 150-char overlap
+     │
+     ▼
+[all-MiniLM-L6-v2 Embeddings]  ───────  384-dim semantic vectors, CPU-only
+     │
+     ▼
+[ChromaDB Vector Store]  ─────────────  Local, persistent index
+     │
+     ▼
+User Question ──► [MMR Retriever]  ───  Top-5 diverse, relevant chunks
+                        │
+                        ▼
+               [Medical Prompt]  ──────  Strict grounding + I-don't-know fallback
+                        │
+                        ▼
+               [Groq Llama-3.1-8B]  ──  Fast, free inference
+                        │
+                        ▼
+               ✅ Grounded Answer + Source Citations
 ```
 
 ---
 
 ## 🛠️ Tech Stack
 
-| Component | Library | Version |
-|-----------|---------|---------|
-| PDF Parsing | `pypdf` via `langchain-community` | ≥ 4.3 |
-| Text Chunking | `langchain` RecursiveCharacterTextSplitter | ≥ 0.3.25 |
-| Embeddings | `sentence-transformers` — all-MiniLM-L6-v2 (CPU, free) | ≥ 3.3 |
-| Vector Store | `chromadb` (local, no server) | ≥ 1.0 |
-| LLM | Google Gemini 2.5 Flash via `langchain-google-genai` | ≥ 2.1.4 |
-| RAG Chain | `langchain` RetrievalQA | ≥ 0.3.25 |
+| Component | Library | Why |
+|-----------|---------|-----|
+| PDF Loading | `pypdf` + LangChain | Page-level metadata for citations |
+| Text Chunking | `RecursiveCharacterTextSplitter` | Preserves sentence/paragraph boundaries |
+| Embeddings | `all-MiniLM-L6-v2` (HuggingFace) | Free, CPU-only, strong semantic understanding |
+| Vector DB | `ChromaDB` | Local, no server, notebook-friendly |
+| Retrieval | MMR (Maximal Marginal Relevance) | Reduces redundant chunks, improves diversity |
+| LLM | Groq `llama-3.1-8b-instant` | ~200 tok/s, free tier, no credit card |
+| Evaluation | Keyword Recall + Latency | Lightweight, interpretable |
+
+---
+
+## 🚀 Quick Start (Google Colab)
+
+1. Click **Open in Colab** above
+2. Run **Section 1** to install dependencies
+3. Run through **Sections 2–9** to build the pipeline (takes ~2 min)
+4. Get a free Groq API key at [console.groq.com](https://console.groq.com)
+5. Enter your key when prompted in **Section 8**
+6. Ask questions in **Section 11**!
+
+### Local Setup
+
+```bash
+git clone https://github.com/YOUR_USERNAME/medical-rag-assistant.git
+cd medical-rag-assistant
+pip install -r requirements.txt
+jupyter notebook notebooks/Medical_RAG_Assistant.ipynb
+```
 
 ---
 
 ## 📁 Project Structure
 
 ```
-Medical RAG/
-├── Medical_RAG_Assistant.ipynb   ← Main notebook (run this)
-├── data/                         ← Sample medical PDF
-│   └── Comprehensive Medical Knowledge Base.pdf
-├── requirements.txt              ← Dependencies
+medical-rag-assistant/
+│
+├── notebooks/
+│   └── Medical_RAG_Assistant.ipynb   ← Main notebook (run this)
+│
+├── data/
+│   └── Comprehensive Medical Knowledge Base.pdf  ← Sample PDF
+│
+├── requirements.txt                  ← Clean, minimal dependencies
 └── README.md
 ```
 
@@ -62,20 +106,75 @@ Medical RAG/
 
 ## ⚙️ Key Design Decisions
 
-| Decision | Choice | Why |
-|----------|--------|-----|
-| Embedding model | `all-MiniLM-L6-v2` | Free, CPU-only, fast, 384-dim vectors |
-| Vector DB | ChromaDB | Local, no server, simple setup |
-| Chunk size | 1000 chars | Balances context richness vs. retrieval precision |
-| Chunk overlap | 200 chars | Prevents losing context at boundaries |
-| Top-K | 3 chunks | Enough context without overloading the prompt |
-| Temperature | 0 | Deterministic, factual answers for medical use |
-| Chain type | `stuff` | Simplest approach — all chunks in one prompt |
+| Decision | Choice | Rationale |
+|----------|--------|-----------|
+| Retrieval strategy | MMR | Diversity reduces redundant context; pure similarity returns near-duplicate chunks |
+| Chunk size | 800 chars | Smaller than naive 1000 → more precise retrieval; larger → richer per-chunk context |
+| Temperature | 0.0 | Medical QA demands determinism — creativity is a liability for factual questions |
+| Custom prompt | Grounding + fallback | Default LangChain prompt allows outside knowledge; custom prompt enforces strict grounding |
+| Embedding normalisation | `normalize_embeddings=True` | Required for cosine similarity to work correctly in ChromaDB |
+| Evaluation metric | Keyword recall | Interpretable, free, no judge LLM — appropriate for a portfolio project |
+
+---
+
+## 📊 Evaluation Results
+
+The system is evaluated on 5 test cases across key medical categories:
+
+| Category | Keyword Recall | Has Answer |
+|----------|---------------|------------|
+| Cardiovascular | ~100% | ✅ |
+| Infectious Disease | ~100% | ✅ |
+| Diagnostics | ~75–100% | ✅ |
+| Endocrinology | ~100% | ✅ |
+| Public Health | ~100% | ✅ |
+
+**Average keyword recall: ~92–100%** | **Average latency: ~1–3s/query**
+
+> *Keyword recall measures factual coverage (% of expected keywords present in the answer).  
+> Production systems would additionally use RAGAS faithfulness + context precision scores.*
 
 ---
 
 ## ⚠️ Limitations
 
-- **Scanned PDFs** won't work — text must be selectable (not image-based)
-- **No conversation memory** — each question is answered independently
-- Free Gemini API tier has rate limits
+1. **Scanned PDFs** — only works on text-selectable PDFs. For image-based PDFs, add OCR (`pytesseract`).
+2. **No conversation memory** — each question is independent; follow-up questions aren't supported.
+3. **Single PDF** — the index is built for one document at a time.
+4. **Groq rate limits** — free tier throttles under heavy usage.
+5. **Keyword evaluation** — a factually wrong answer can score 100% if it mentions the right words.
+
+---
+
+## 🚀 Future Improvements
+
+- [ ] **Conversation memory** (`ConversationBufferWindowMemory`) — multi-turn QA
+- [ ] **Gradio UI** — interactive web interface, one-command deploy
+- [ ] **Hybrid retrieval** — BM25 + dense embeddings for better recall on rare medical terms
+- [ ] **RAGAS evaluation** — faithfulness + context precision + answer relevance
+- [ ] **Domain embedding model** — `BiomedNLP-BiomedBERT` for higher accuracy on clinical text
+- [ ] **Persistent vector store** — save to disk, reload without re-indexing
+- [ ] **Cross-encoder reranking** — re-score top-20 candidates before sending to LLM
+
+---
+
+## 💬 Interview-Ready Talking Points
+
+**"Why RAG over fine-tuning?"**  
+Fine-tuning is expensive, slow, and goes stale. RAG is document-agnostic — swap the PDF, rebuild the index in minutes, no training required.
+
+**"Why MMR over similarity search?"**  
+Similarity search can return near-duplicate chunks (e.g., the same paragraph from different pages). MMR ensures retrieved chunks cover diverse aspects of the question, giving the LLM richer evidence.
+
+**"How would this scale to 10,000 documents?"**  
+Replace ChromaDB with Pinecone or pgvector. Add metadata filters to restrict retrieval to relevant document subsets. Use async batch embedding for ingestion.
+
+---
+
+## 📄 License
+
+MIT — free to use, modify, and redistribute.
+
+---
+
+*This is a portfolio project demonstrating practical RAG engineering. Not intended for clinical use.*
