@@ -145,6 +145,5 @@ medical-rag-assistant/
 
 ---
 
----
 
 *This is a portfolio project demonstrating practical RAG engineering. Not intended for clinical use.*
