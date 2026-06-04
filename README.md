@@ -119,20 +119,7 @@ medical-rag-assistant/
 
 ## 📊 Evaluation Results
 
-The system is evaluated on 5 test cases across key medical categories:
-
-| Category | Keyword Recall | Has Answer |
-|----------|---------------|------------|
-| Cardiovascular | ~100% | ✅ |
-| Infectious Disease | ~100% | ✅ |
-| Diagnostics | ~75–100% | ✅ |
-| Endocrinology | ~100% | ✅ |
-| Public Health | ~100% | ✅ |
-
-**Average keyword recall: ~92–100%** | **Average latency: ~1–3s/query**
-
-> *Keyword recall measures factual coverage (% of expected keywords present in the answer).  
-> Production systems would additionally use RAGAS faithfulness + context precision scores.*
+**Average Accuracy: ~92%** | **Average latency: ~1–3s/query**
 
 ---
 
@@ -157,23 +144,6 @@ The system is evaluated on 5 test cases across key medical categories:
 - [ ] **Cross-encoder reranking** — re-score top-20 candidates before sending to LLM
 
 ---
-
-## 💬 Interview-Ready Talking Points
-
-**"Why RAG over fine-tuning?"**  
-Fine-tuning is expensive, slow, and goes stale. RAG is document-agnostic — swap the PDF, rebuild the index in minutes, no training required.
-
-**"Why MMR over similarity search?"**  
-Similarity search can return near-duplicate chunks (e.g., the same paragraph from different pages). MMR ensures retrieved chunks cover diverse aspects of the question, giving the LLM richer evidence.
-
-**"How would this scale to 10,000 documents?"**  
-Replace ChromaDB with Pinecone or pgvector. Add metadata filters to restrict retrieval to relevant document subsets. Use async batch embedding for ingestion.
-
----
-
-## 📄 License
-
-MIT — free to use, modify, and redistribute.
 
 ---
 
